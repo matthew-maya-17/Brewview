@@ -9,8 +9,10 @@
         <module name="Brewview" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Brewview" target="1.8" />
-    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Brewview" options="-parameters" />
+    </option>
   </component>
 </project>
