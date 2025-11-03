@@ -4,27 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bdd6e922-7c33-46d7-932e-cb2629ab6bb6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Brewview/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/controller/BeverageController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/controller/LocationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/controller/ReviewController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/controller/UserController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/model/Beverage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/model/Location.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/model/Review.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/model/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/repository/BeverageRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/repository/LocationRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/repository/ReviewRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/repository/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/service/BeverageService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/service/LocationService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/service/ReviewService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/java/com/service/UserService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Brewview/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="bdd6e922-7c33-46d7-932e-cb2629ab6bb6" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,9 +33,9 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "mmaya/chore/setup-backend-structure",
+    "git-widget-placeholder": "develop",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/matth/OneDrive/Documents/Coding and Programming/Java/Beverage_Journal",
+    "last_opened_file_path": "C:/Users/matth/OneDrive/Documents/Coding and Programming/Java/Beverage_Journal/Brewview",
     "onboarding.tips.debug.path": "C:/Users/matth/OneDrive/Documents/Coding and Programming/Java/Beverage_Journal/Brewview/src/main/java/com/Main.java",
     "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings"
   }
