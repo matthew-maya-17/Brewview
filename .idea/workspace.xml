@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bdd6e922-7c33-46d7-932e-cb2629ab6bb6" name="Changes" comment="" />
+    <list default="true" id="bdd6e922-7c33-46d7-932e-cb2629ab6bb6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,7 +37,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "develop",
+    "git-widget-placeholder": "mmaya/feature/vite-frontend-scaffold",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/matth/OneDrive/Documents/Coding and Programming/Java/Beverage_Journal/Brewview",
     "onboarding.tips.debug.path": "C:/Users/matth/OneDrive/Documents/Coding and Programming/Java/Beverage_Journal/Brewview/src/main/java/com/Main.java",
