@@ -15,7 +15,7 @@
     </parent>
 
     <dependencies>
-    <!-- Spring MVC -->
+    <!-- Spring Web Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -48,6 +48,12 @@
         </dependency>
 
 <!-- Database Dependencies: -->
+
+    <!-- Validations Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 
     <!-- Spring Boot JPA Starter -->
         <dependency>
