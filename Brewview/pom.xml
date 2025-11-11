@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0-M3</version>
+        <version>3.5.7</version>
     </parent>
 
     <dependencies>
@@ -73,7 +73,11 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+    <!-- H2 Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
-
 </project>
