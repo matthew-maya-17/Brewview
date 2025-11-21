@@ -38,6 +38,9 @@ jobs:
           architecture: x64
           cache: maven
 
+      - name: Change into Brewview directory
+        run: cd Brewview
+
       - name: Install dependencies
         run: mvn clean install
 
@@ -68,7 +71,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: Brewview
           push: true
           tags: ghcr.io/matthew-maya-17/Brewview/app:staging
 
