@@ -38,11 +38,8 @@ jobs:
           architecture: x64
           cache: maven
 
-      - name: Change into Brewview directory
-        run: cd Brewview && ls 
-
       - name: Install dependencies
-        run: mvn clean install
+        run: cd Brewview && mvn clean install
 
       - name: Build project
         run: mvn package
