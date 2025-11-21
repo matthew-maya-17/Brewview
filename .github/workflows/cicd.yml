@@ -39,12 +39,15 @@ jobs:
           cache: maven
 
       - name: Install dependencies
-        run: cd Brewview && mvn clean install
+        working-directory: Brewview
+        run: mvn clean install
 
       - name: Build project
+        working-directory: Brewview
         run: mvn package
 
       - name: Run tests
+        working-directory: Brewview
         run: mvn test
 
   # QA deployment job
