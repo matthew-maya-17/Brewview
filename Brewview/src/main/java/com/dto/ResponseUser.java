@@ -1,13 +1,16 @@
 package com.dto;
 
+import com.model.Role;
+
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class ResponseUser {
 
-    private String id;
+    private UUID id;
     private String username;
     private String email;
-    private String roleName;
+    private Role roleName;
     private LocalDateTime createdAt;
 
     // Note: NO passwordHash - never expose passwords!
@@ -15,7 +18,7 @@ public class ResponseUser {
     // Constructors
     public ResponseUser() {}
 
-    public ResponseUser(String id, String username, String email, String roleName, LocalDateTime createdAt) {
+    public ResponseUser(UUID id, String username, String email, Role roleName, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -24,11 +27,11 @@ public class ResponseUser {
     }
 
     // Getters and Setters
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -48,11 +51,11 @@ public class ResponseUser {
         this.email = email;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
 

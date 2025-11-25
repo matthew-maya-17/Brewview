@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -14,7 +15,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
-    private String id;
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     @NotBlank
@@ -31,15 +32,14 @@ public class User {
     private String passwordHash;
 
     @Column(name = "role_name", nullable = false)
-    @NotBlank
-    private String roleName;
+    private Role roleName;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public User() {}
 
-    public User(String username, String email, String passwordHash, String roleName, LocalDateTime createdAt) {
+    public User(String username, String email, String passwordHash, Role roleName, LocalDateTime createdAt) {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
@@ -47,8 +47,12 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id){
+        this.id = id;
     }
 
     public String getUsername() {
@@ -75,15 +79,19 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
 
     public LocalDateTime getTimestamp() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

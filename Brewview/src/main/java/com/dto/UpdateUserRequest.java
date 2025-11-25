@@ -1,6 +1,7 @@
 package com.dto;
 
 
+import com.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
@@ -16,10 +17,17 @@ public class UpdateUserRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    private String roleName;
+    private Role roleName;
 
     // Constructors
     public UpdateUserRequest() {}
+
+    public UpdateUserRequest(String username, String email, String password, Role roleName) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roleName = roleName;
+    }
 
     // Getters and Setters
     public String getUsername() {
@@ -46,11 +54,11 @@ public class UpdateUserRequest {
         this.password = password;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
 }
