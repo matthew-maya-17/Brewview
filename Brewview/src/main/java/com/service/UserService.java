@@ -3,10 +3,12 @@ package com.service;
 import com.dto.CreateUserRequest;
 import com.dto.ResponseUser;
 import com.dto.UpdateUserRequest;
+import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Role;
 import com.model.User;
 import com.repository.UserRepository;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,12 +33,12 @@ public class UserService {
     public ResponseUser addUser(CreateUserRequest createUserRequest){
         // Check if username already exists
         if (userRepository.findUserByUsername(createUserRequest.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new ResourceConflictException("Username already exists");
         }
 
         // Check if email already exists
         if (userRepository.findUserByEmail(createUserRequest.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new ResourceConflictException("Email already exists");
         }
 
         // Create new user entity
@@ -106,7 +108,7 @@ public class UserService {
         return convertToResponseDto(updatedUser);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostAuthorize("hasRole('ADMIN')")
     public ResponseUser updateRole(UUID userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userId + " does not exist."));

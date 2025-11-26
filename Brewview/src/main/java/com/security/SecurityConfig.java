@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints - authentication
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").hasAuthority("ROLE_ADMIN")
 
                         // Role-based endpoints
                         .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_MODERATOR", "ROLE_ADMIN")
