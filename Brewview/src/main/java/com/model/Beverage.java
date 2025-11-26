@@ -1,7 +1,9 @@
 package com.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -26,7 +28,8 @@ public class Beverage {
     private String type;
 
     @Column(name = "abv", nullable = false)
-    @NotBlank
+    @NotNull(message = "ABV cannot be null")
+    @Min(value = 0, message = "ABV must be 0 or greater")
     private int abv;
 
     @Column(unique = true, nullable = false)
