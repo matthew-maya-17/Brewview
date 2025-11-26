@@ -54,6 +54,13 @@
             <scope>test</scope>
         </dependency>
 
+    <!-- OpenAPI Swagger Documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
     <!-- Java JWT -->
         <dependency>
             <groupId>com.auth0</groupId>
