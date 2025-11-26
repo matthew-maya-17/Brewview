@@ -3,6 +3,7 @@ package com.service;
 import com.dto.CreateUserRequest;
 import com.dto.ResponseUser;
 import com.dto.UpdateUserRequest;
+import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Role;
 import com.model.User;
@@ -106,8 +107,8 @@ class UserServiceTest {
         when(userRepository.findUserByUsername("existingUserName")).thenReturn(Optional.of(existingUser));
 
         //Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
                 () -> userService.addUser(createUserRequest)
         );
 
@@ -139,8 +140,8 @@ class UserServiceTest {
         when(userRepository.findUserByEmail("existing@aol.com")).thenReturn(Optional.of(existingUser));
 
         //Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ResourceConflictException exception = assertThrows(
+                ResourceConflictException.class,
                 () -> userService.addUser(createUserRequest)
         );
 
