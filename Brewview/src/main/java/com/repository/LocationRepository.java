@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface LocationRepository extends JpaRepository<Location, String> {
+public interface LocationRepository extends JpaRepository<Location, UUID> {
 
     Optional<Location> findByLocationName(String locationName);
 

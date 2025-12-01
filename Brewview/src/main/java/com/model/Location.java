@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "locations")
 public class Location {
@@ -12,7 +14,7 @@ public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private String id;
+    private UUID id;
 
     @Column(name = "location_name", nullable = false)
     @NotBlank(message = "Location name cannot be blank")
@@ -31,7 +33,7 @@ public class Location {
 
     @Column(name = "country", nullable = false)
     @NotBlank(message = "Country cannot be blank")
-    @Size(message = "Country must be between 1 and 100 characters!", min = 1, max = 100)
+    @Size(message = "Country must be between 4 and 100 characters!", min = 4, max = 100)
     private String country;
 
     public Location() {}
@@ -43,7 +45,7 @@ public class Location {
         this.country = country;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
