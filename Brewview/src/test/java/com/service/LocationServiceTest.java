@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,9 +30,14 @@ public class LocationServiceTest {
 
     private Location testLocation;
     private Location testLocation2;
+    private UUID testLocationId;
+    private UUID testLocation2Id;
 
     @BeforeEach
     void setUp() {
+        testLocationId = UUID.randomUUID();
+        testLocation2Id = UUID.randomUUID();
+
         testLocation = new Location(
                 "Headquarters",
                 "123 Main Street",
@@ -76,25 +82,24 @@ public class LocationServiceTest {
 
     @Test
     void getLocationById_Success() {
-        String locationId = "test-id-123";
-        when(locationRepository.findById(locationId)).thenReturn(Optional.of(testLocation));
+        when(locationRepository.findById(testLocationId)).thenReturn(Optional.of(testLocation));
 
-        Optional<Location> result = locationService.getLocationById(locationId);
+        Optional<Location> result = locationService.getLocationById(testLocationId);
 
         assertTrue(result.isPresent());
         assertEquals(testLocation.getLocationName(), result.get().getLocationName());
-        verify(locationRepository).findById(locationId);
+        verify(locationRepository).findById(testLocationId);
     }
 
     @Test
     void getLocationById_ReturnsEmpty_WhenNotFound() {
-        String locationId = "non-existent-id";
-        when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
+        UUID nonExistentId = UUID.randomUUID();
+        when(locationRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        Optional<Location> result = locationService.getLocationById(locationId);
+        Optional<Location> result = locationService.getLocationById(nonExistentId);
 
         assertFalse(result.isPresent());
-        verify(locationRepository).findById(locationId);
+        verify(locationRepository).findById(nonExistentId);
     }
 
     @Test
@@ -157,7 +162,6 @@ public class LocationServiceTest {
 
     @Test
     void updateLocation_Success() {
-        String locationId = "test-id-123";
         Location updatedLocation = new Location(
                 "Headquarters Updated",
                 "789 New Street",
@@ -165,35 +169,34 @@ public class LocationServiceTest {
                 "USA"
         );
 
-        when(locationRepository.findById(locationId)).thenReturn(Optional.of(testLocation));
+        when(locationRepository.findById(testLocationId)).thenReturn(Optional.of(testLocation));
         when(locationRepository.existsByLocationName("Headquarters Updated")).thenReturn(false);
         when(locationRepository.save(any(Location.class))).thenReturn(testLocation);
 
-        Location result = locationService.updateLocation(locationId, updatedLocation);
+        Location result = locationService.updateLocation(testLocationId, updatedLocation);
 
         assertNotNull(result);
-        verify(locationRepository).findById(locationId);
+        verify(locationRepository).findById(testLocationId);
         verify(locationRepository).save(any(Location.class));
     }
 
     @Test
     void updateLocation_ThrowsException_WhenLocationNotFound() {
-        String locationId = "non-existent-id";
-        when(locationRepository.findById(locationId)).thenReturn(Optional.empty());
+        UUID nonExistentId = UUID.randomUUID();
+        when(locationRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> locationService.updateLocation(locationId, testLocation)
+                () -> locationService.updateLocation(nonExistentId, testLocation)
         );
 
         assertTrue(exception.getMessage().contains("not found"));
-        verify(locationRepository).findById(locationId);
+        verify(locationRepository).findById(nonExistentId);
         verify(locationRepository, never()).save(any());
     }
 
     @Test
     void updateLocation_ThrowsException_WhenNewNameAlreadyExists() {
-        String locationId = "test-id-123";
         Location updatedLocation = new Location(
                 "Branch Office",
                 "789 New Street",
@@ -201,12 +204,12 @@ public class LocationServiceTest {
                 "USA"
         );
 
-        when(locationRepository.findById(locationId)).thenReturn(Optional.of(testLocation));
+        when(locationRepository.findById(testLocationId)).thenReturn(Optional.of(testLocation));
         when(locationRepository.existsByLocationName("Branch Office")).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> locationService.updateLocation(locationId, updatedLocation)
+                () -> locationService.updateLocation(testLocationId, updatedLocation)
         );
 
         assertTrue(exception.getMessage().contains("already exists"));
@@ -215,51 +218,48 @@ public class LocationServiceTest {
 
     @Test
     void deleteLocation_Success() {
-        String locationId = "test-id-123";
-        when(locationRepository.existsById(locationId)).thenReturn(true);
-        doNothing().when(locationRepository).deleteById(locationId);
+        when(locationRepository.existsById(testLocationId)).thenReturn(true);
+        doNothing().when(locationRepository).deleteById(testLocationId);
 
-        assertDoesNotThrow(() -> locationService.deleteLocation(locationId));
+        assertDoesNotThrow(() -> locationService.deleteLocation(testLocationId));
 
-        verify(locationRepository).existsById(locationId);
-        verify(locationRepository).deleteById(locationId);
+        verify(locationRepository).existsById(testLocationId);
+        verify(locationRepository).deleteById(testLocationId);
     }
 
     @Test
     void deleteLocation_ThrowsException_WhenLocationNotFound() {
-        String locationId = "non-existent-id";
-        when(locationRepository.existsById(locationId)).thenReturn(false);
+        UUID nonExistentId = UUID.randomUUID();
+        when(locationRepository.existsById(nonExistentId)).thenReturn(false);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> locationService.deleteLocation(locationId)
+                () -> locationService.deleteLocation(nonExistentId)
         );
 
         assertTrue(exception.getMessage().contains("not found"));
-        verify(locationRepository).existsById(locationId);
+        verify(locationRepository).existsById(nonExistentId);
         verify(locationRepository, never()).deleteById(anyString());
     }
 
     @Test
     void locationExists_ReturnsTrue_WhenExists() {
-        String locationId = "test-id-123";
-        when(locationRepository.existsById(locationId)).thenReturn(true);
+        when(locationRepository.existsById(testLocationId)).thenReturn(true);
 
-        boolean result = locationService.locationExists(locationId);
+        boolean result = locationService.locationExists(testLocationId);
 
         assertTrue(result);
-        verify(locationRepository).existsById(locationId);
+        verify(locationRepository).existsById(testLocationId);
     }
 
     @Test
     void locationExists_ReturnsFalse_WhenNotExists() {
-        String locationId = "non-existent-id";
-        when(locationRepository.existsById(locationId)).thenReturn(false);
+        when(locationRepository.existsById(testLocationId)).thenReturn(false);
 
-        boolean result = locationService.locationExists(locationId);
+        boolean result = locationService.locationExists(testLocationId);
 
         assertFalse(result);
-        verify(locationRepository).existsById(locationId);
+        verify(locationRepository).existsById(testLocationId);
     }
 
     @Test

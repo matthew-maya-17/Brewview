@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -27,7 +28,7 @@ public class LocationService {
         return locationRepository.save(location);
     }
 
-    public Optional<Location> getLocationById(String id) {
+    public Optional<Location> getLocationById(UUID id) {
         return locationRepository.findById(id);
     }
 
@@ -51,7 +52,7 @@ public class LocationService {
         return locationRepository.findByCityAndCountry(city, country);
     }
 
-    public Location updateLocation(String id, Location updatedLocation) {
+    public Location updateLocation(UUID id, Location updatedLocation) {
         return locationRepository.findById(id)
                 .map(location -> {
                     if (!location.getLocationName().equals(updatedLocation.getLocationName())
@@ -68,14 +69,14 @@ public class LocationService {
                 .orElseThrow(() -> new IllegalArgumentException("Location with id '" + id + "' not found"));
     }
 
-    public void deleteLocation(String id) {
+    public void deleteLocation(UUID id) {
         if (!locationRepository.existsById(id)) {
             throw new IllegalArgumentException("Location with id '" + id + "' not found");
         }
         locationRepository.deleteById(id);
     }
 
-    public boolean locationExists(String id) {
+    public boolean locationExists(UUID id) {
         return locationRepository.existsById(id);
     }
 
