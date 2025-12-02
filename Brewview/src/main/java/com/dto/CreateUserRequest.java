@@ -1,21 +1,27 @@
 package com.dto;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "Request DTO for creating a new user")
 public class CreateUserRequest {
 
+    @Schema(description = "Unique username for the user", example = "unique-username-637")
     @NotBlank(message = "Username is required")
     @Size(min = 6, max = 254, message = "Username must be between 6 and 254 characters")
     private String username;
 
+
+    @Schema(description = "User's email address", example = "example@hotmail.com")
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     @Size(min = 6, max = 254, message = "Email must be between 6 and 254 characters")
     private String email;
 
+    @Schema(description = "Plaintext password, will be hashed", example = "strongPassword123")
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;  // Plain password, not hash
