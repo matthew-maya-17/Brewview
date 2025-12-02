@@ -203,7 +203,7 @@ public class UserController {
 
     @Operation(
             summary = "Update a user by ID",
-            description = "Updates the User entity with the specified UUID using the fields provided in the JSON request body.",
+            description = "Updates user profile fields (username, email, password). Available to all authenticated users. To update role, use PUT /api/users/{id}/role endpoint.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -251,7 +251,7 @@ public class UserController {
 
     @Operation(
             summary = "Update a user's role",
-            description = "Updates only the role of the User entity with the specified UUID.",
+            description = "Updates only the role of the User entity with the specified UUID. ADMIN only.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",

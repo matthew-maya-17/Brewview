@@ -8,7 +8,6 @@ import com.exception.ResourceNotFoundException;
 import com.model.Role;
 import com.model.User;
 import com.repository.UserRepository;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,24 +82,40 @@ public class UserService {
     }
 
     //UPDATE
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     public ResponseUser updateUserById(UUID id, UpdateUserRequest updateRequest){
         // Find existing user
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + id + " does not exist."));
 
-        // Update fields if provided (partial update)
-        if(updateRequest.getUsername() != null && !updateRequest.getUsername().isBlank()) {
-            existingUser.setUsername(updateRequest.getUsername());
+        // Update username (if provided and different)
+        if (updateRequest.getUsername() != null &&
+                !updateRequest.getUsername().trim().isEmpty() &&
+                !updateRequest.getUsername().trim().equals(existingUser.getUsername())) {
+
+            // Validate uniqueness
+            if (userRepository.findUserByUsername(updateRequest.getUsername().trim()).isPresent()) {
+                throw new ResourceConflictException("Username already exists");
+            }
+            existingUser.setUsername(updateRequest.getUsername().trim());
         }
-        if(updateRequest.getEmail() != null && !updateRequest.getEmail().isBlank()) {
-            existingUser.setEmail(updateRequest.getEmail());
+
+        // Update email (if provided and different)
+        if (updateRequest.getEmail() != null &&
+                !updateRequest.getEmail().trim().isEmpty() &&
+                !updateRequest.getEmail().trim().equals(existingUser.getEmail())) {
+
+            // Validate uniqueness
+            if (userRepository.findUserByEmail(updateRequest.getEmail().trim()).isPresent()) {
+                throw new ResourceConflictException("Email already exists");
+            }
+            existingUser.setEmail(updateRequest.getEmail().trim());
         }
-        if(updateRequest.getPassword() != null && !updateRequest.getPassword().isBlank()) {
-            // Hash the new password
-            existingUser.setPasswordHash(passwordEncoder.encode(updateRequest.getPassword()));
-        }
-        if(updateRequest.getRoleName() != null && updateRequest.getRoleName() != existingUser.getRoleName()) {
-            existingUser.setRoleName(updateRequest.getRoleName());
+
+        // Update password (if provided)
+        if (updateRequest.getPassword() != null &&
+                !updateRequest.getPassword().trim().isEmpty()) {
+            existingUser.setPasswordHash(passwordEncoder.encode(updateRequest.getPassword().trim()));
         }
 
         // Save and return Response DTO
@@ -108,13 +123,12 @@ public class UserService {
         return convertToResponseDto(updatedUser);
     }
 
-    @PostAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseUser updateRole(UUID userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userId + " does not exist."));
 
-        user.setRoleName(request.getRoleName()); // e.g., ROLE_ADMIN, ROLE_MODERATOR
-
+        user.setRoleName(request.getRoleName()); // e.g., ROLE_ADMIN
         return convertToResponseDto(userRepository.save(user));
     }
 

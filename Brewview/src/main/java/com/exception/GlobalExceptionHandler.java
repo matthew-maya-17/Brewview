@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleResourceConflictException(ResourceConflictException e, HttpServletRequest request){
         ApiError errorResponse = new ApiError();
         errorResponse.setTimeStamp(LocalDateTime.now());
-        errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
-        errorResponse.setError(HttpStatus.NOT_FOUND.getReasonPhrase());
+        errorResponse.setStatus(HttpStatus.CONFLICT.value());
+        errorResponse.setError(HttpStatus.CONFLICT.getReasonPhrase());
         errorResponse.setMessage(e.getMessage());
         errorResponse.setPath(request.getRequestURI());
 
