@@ -114,8 +114,8 @@ public class UserService {
 
         // Update password (if provided)
         if (updateRequest.getPassword() != null &&
-                !updateRequest.getPassword().trim().isEmpty()) {
-            existingUser.setPasswordHash(passwordEncoder.encode(updateRequest.getPassword().trim()));
+                !updateRequest.getPassword().isEmpty()) {
+            existingUser.setPasswordHash(passwordEncoder.encode(updateRequest.getPassword()));
         }
 
         // Save and return Response DTO
