@@ -73,7 +73,7 @@ jobs:
         with:
           context: Brewview
           push: true
-          tags: ghcr.io/matthew-maya-17/Brewview/app:staging
+          tags: ghcr.io/matthew-maya-17/brewview/app:staging
 
   # Production deployment job
   deploy-to-production:
@@ -94,10 +94,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull Docker image
-        run: docker pull ghcr.io/matthew-maya-17/Brewview/app:staging
+        run: docker pull ghcr.io/matthew-maya-17/brewview/app:staging
 
       - name: Tag Docker image for production
-        run: docker tag ghcr.io/matthew-maya-17/Brewview/app:staging ghcr.io/matthew-maya-17/Brewview/app:latest
+        run: docker tag ghcr.io/matthew-maya-17/brewview/app:staging ghcr.io/matthew-maya-17/brewview/app:latest
 
       - name: Push Docker image to production
-        run: docker push ghcr.io/matthew-maya-17/Brewview/app:latest
+        run: docker push ghcr.io/matthew-maya-17/brewview/app:latest
