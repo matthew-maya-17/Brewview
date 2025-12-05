@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "beverages")
@@ -13,7 +14,7 @@ public class Beverage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "beverage_id")
-    private String id;
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     @NotBlank
@@ -45,7 +46,7 @@ public class Beverage {
     public Beverage() {
     }
 
-    public Beverage(String id, String beverageName, String type, int abv, String description, String img_url, LocalDateTime createdAt) {
+    public Beverage(UUID id, String beverageName, String type, int abv, String description, String img_url, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
@@ -55,11 +56,11 @@ public class Beverage {
         this.createdAt = createdAt;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

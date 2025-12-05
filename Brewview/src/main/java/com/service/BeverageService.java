@@ -1,118 +1,140 @@
 package com.service;
 
+import com.dto.BeverageDTO;
+import com.exception.ResourceNotFoundException;
 import com.model.Beverage;
 import com.repository.BeverageRepository;
+import com.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BeverageService {
 
     private final BeverageRepository beverageRepository;
 
-    @Autowired
+
     public BeverageService(BeverageRepository beverageRepository) {
         this.beverageRepository = beverageRepository;
     }
 
-
-    public Beverage createBeverage(Beverage beverage) {
-        if (beverage == null) {
-            throw new IllegalArgumentException("Beverage cannot be null");
+    public BeverageDTO createBeverage(BeverageDTO beverageDTO) {
+        if (beverageDTO == null) {
+                throw new BadRequestException("Beverage cannot be null");
         }
 
+        Beverage beverage = toEntity(beverageDTO);
         beverage.setCreatedAt(LocalDateTime.now());
 
-        return beverageRepository.save(beverage);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public List<Beverage> createBeverages(List<Beverage> beverages) {
-        if (beverages == null || beverages.isEmpty()) {
-            throw new IllegalArgumentException("Beverage list cannot be null or empty");
+    public List<BeverageDTO> createBeverages(List<BeverageDTO> beverageDTOS) {
+        if (beverageDTOS == null || beverageDTOS.isEmpty()) {
+                throw new BadRequestException("Beverage list cannot be null or empty");
         }
 
+        List<Beverage> beverages = toEntityList(beverageDTOS);
         beverages.forEach(beverage -> beverage.setCreatedAt(LocalDateTime.now()));
-        return beverageRepository.saveAll(beverages);
+
+        List<Beverage> savedBeverages = beverageRepository.saveAll(beverages);
+        return toDTOList(savedBeverages);
     }
 
 
-    public List<Beverage> getAllBeverages() {
-        return beverageRepository.findAll();
+    public List<BeverageDTO> getAllBeverages() {
+        List<Beverage> beverages = beverageRepository.findAll();
+        return toDTOList(beverages);
     }
 
-    public Optional<Beverage> getBeverageById(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO getBeverageById(UUID id) {
+        if (id == null) {
+                throw new BadRequestException("Beverage ID cannot be null");
         }
-        return beverageRepository.findById(id);
+
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        return toDTO(beverage);
     }
 
-    public Optional<Beverage> getBeverageByName(String beverageName) {
+    public Optional<BeverageDTO> getBeverageByName(String beverageName) {
+
         if (beverageName == null || beverageName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage name cannot be null or empty");
+                throw new BadRequestException("Beverage name cannot be null or empty");
         }
 
         List<Beverage> beverages = beverageRepository.findAll();
         return beverages.stream()
                 .filter(b -> b.getBeverageName().equals(beverageName))
-                .findFirst();
+                .findFirst()
+                .map(this::toDTO);
     }
 
-    public List<Beverage> getBeveragesByType(String type) {
+    public List<BeverageDTO> getBeveragesByType(String type) {
         if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage type cannot be null or empty");
+                throw new BadRequestException("Beverage type cannot be null or empty");
         }
 
-        return beverageRepository.findAll().stream()
+        List<Beverage> beverages = beverageRepository.findAll().stream()
                 .filter(b -> b.getType().equals(type))
                 .toList();
+
+        return toDTOList(beverages);
     }
 
-    public List<Beverage> getBeveragesByAbvRange(int minAbv, int maxAbv) {
+    public List<BeverageDTO> getBeveragesByAbvRange(int minAbv, int maxAbv) {
         if (minAbv < 0) {
-            throw new IllegalArgumentException("Minimum ABV cannot be negative");
+                throw new BadRequestException("Minimum ABV cannot be negative");
         }
         if (maxAbv < minAbv) {
-            throw new IllegalArgumentException("Maximum ABV cannot be less than minimum ABV");
+                throw new BadRequestException("Maximum ABV cannot be less than minimum ABV");
         }
 
-        return beverageRepository.findAll().stream()
+        List<Beverage> beverages = beverageRepository.findAll().stream()
                 .filter(b -> b.getAbv() >= minAbv && b.getAbv() <= maxAbv)
                 .toList();
+
+        return toDTOList(beverages);
     }
 
-    public List<Beverage> getBeveragesByTypeAndAbvRange(String type, int minAbv, int maxAbv) {
+    public List<BeverageDTO> getBeveragesByTypeAndAbvRange(String type, int minAbv, int maxAbv) {
         if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage type cannot be null or empty");
+                throw new BadRequestException("Beverage type cannot be null or empty");
         }
         if (minAbv < 0) {
-            throw new IllegalArgumentException("Minimum ABV cannot be negative");
+                throw new BadRequestException("Minimum ABV cannot be negative");
         }
         if (maxAbv < minAbv) {
-            throw new IllegalArgumentException("Maximum ABV cannot be less than minimum ABV");
+                throw new BadRequestException("Maximum ABV cannot be less than minimum ABV");
         }
 
-        return beverageRepository.findAll().stream()
+
+        List<Beverage> beverages = beverageRepository.findAll().stream()
                 .filter(b -> b.getType().equals(type))
                 .filter(b -> b.getAbv() >= minAbv && b.getAbv() <= maxAbv)
                 .toList();
+
+        return toDTOList(beverages);
     }
 
-    public boolean beverageExists(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public boolean beverageExists(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         return beverageRepository.existsById(id);
     }
 
     public boolean beverageNameExists(String beverageName) {
         if (beverageName == null || beverageName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage name cannot be null or empty");
+                throw new BadRequestException("Beverage name cannot be null or empty");
         }
 
         return beverageRepository.findAll().stream()
@@ -124,114 +146,114 @@ public class BeverageService {
     }
 
 
-    public Beverage updateBeverage(String id, Beverage updatedBeverage) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO updateBeverage(UUID id, BeverageDTO updatedBeverageDTO) {
+        if (id == null) {
+                throw new BadRequestException("Beverage ID cannot be null");
         }
-        if (updatedBeverage == null) {
-            throw new IllegalArgumentException("Updated beverage cannot be null");
+        if (updatedBeverageDTO == null) {
+                throw new BadRequestException("Updated beverage data cannot be null");
         }
 
-        return beverageRepository.findById(id)
-                .map(existingBeverage -> {
-                    existingBeverage.setBeverageName(updatedBeverage.getBeverageName());
-                    existingBeverage.setType(updatedBeverage.getType());
-                    existingBeverage.setAbv(updatedBeverage.getAbv());
-                    existingBeverage.setDescription(updatedBeverage.getDescription());
-                    existingBeverage.setImg_url(updatedBeverage.getImg_url());
+        Beverage existingBeverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
 
-                    return beverageRepository.save(existingBeverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        existingBeverage.setBeverageName(updatedBeverageDTO.getBeverageName());
+        existingBeverage.setType(updatedBeverageDTO.getType());
+        existingBeverage.setAbv(updatedBeverageDTO.getAbv());
+        existingBeverage.setDescription(updatedBeverageDTO.getDescription());
+        existingBeverage.setImg_url(updatedBeverageDTO.getImgUrl());
+
+        Beverage savedBeverage = beverageRepository.save(existingBeverage);
+        return toDTO(savedBeverage);
     }
 
-    public Beverage updateBeverageName(String id, String newName) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO  updateBeverageName(UUID id, String newName) {
+        if (id == null) {
+                throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         if (newName == null || newName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage name cannot be null or empty");
+                throw new BadRequestException("Beverage name cannot be null or empty");
         }
 
-        return beverageRepository.findById(id)
-                .map(beverage -> {
-                    beverage.setBeverageName(newName);
-                    return beverageRepository.save(beverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        beverage.setBeverageName(newName);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public Beverage updateBeverageType(String id, String newType) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO updateBeverageType(UUID id, String newType) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         if (newType == null || newType.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage type cannot be null or empty");
+            throw new BadRequestException("Beverage type cannot be null or empty");
         }
 
-        return beverageRepository.findById(id)
-                .map(beverage -> {
-                    beverage.setType(newType);
-                    return beverageRepository.save(beverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        beverage.setType(newType);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public Beverage updateBeverageAbv(String id, int newAbv) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO updateBeverageAbv(UUID id, int newAbv) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         if (newAbv < 0) {
-            throw new IllegalArgumentException("ABV cannot be negative");
+            throw new BadRequestException("ABV cannot be negative");
         }
 
-        return beverageRepository.findById(id)
-                .map(beverage -> {
-                    beverage.setAbv(newAbv);
-                    return beverageRepository.save(beverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        beverage.setAbv(newAbv);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public Beverage updateBeverageDescription(String id, String newDescription) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO updateBeverageDescription(UUID id, String newDescription) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         if (newDescription == null || newDescription.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage description cannot be null or empty");
+            throw new BadRequestException("Beverage description cannot be null or empty");
         }
 
-        return beverageRepository.findById(id)
-                .map(beverage -> {
-                    beverage.setDescription(newDescription);
-                    return beverageRepository.save(beverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        beverage.setDescription(newDescription);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public Beverage updateBeverageImageUrl(String id, String newImageUrl) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public BeverageDTO updateBeverageImageUrl(UUID id, String newImageUrl) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
         if (newImageUrl == null || newImageUrl.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage image URL cannot be null or empty");
+            throw new BadRequestException("Beverage image URL cannot be null or empty");
         }
 
-        return beverageRepository.findById(id)
-                .map(beverage -> {
-                    beverage.setImg_url(newImageUrl);
-                    return beverageRepository.save(beverage);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Beverage with ID '" + id + "' not found"));
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        beverage.setImg_url(newImageUrl);
+        Beverage savedBeverage = beverageRepository.save(beverage);
+        return toDTO(savedBeverage);
     }
 
-    public void deleteBeverage(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Beverage ID cannot be null or empty");
+    public void deleteBeverage(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Beverage ID cannot be null or empty");
         }
 
         if (!beverageRepository.existsById(id)) {
-            throw new IllegalArgumentException("Beverage with ID '" + id + "' not found");
+            throw new ResourceNotFoundException("Beverage not found with id: " + id);
         }
 
         beverageRepository.deleteById(id);
@@ -241,11 +263,63 @@ public class BeverageService {
         beverageRepository.deleteAll();
     }
 
-    public void deleteBeveragesByIds(List<String> ids) {
+    public void deleteBeveragesByIds(List<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
-            throw new IllegalArgumentException("ID list cannot be null or empty");
+            throw new BadRequestException("ID list cannot be null or empty");
         }
 
         beverageRepository.deleteAllById(ids);
+    }
+
+    private BeverageDTO toDTO(Beverage beverage) {
+        if (beverage == null) {
+            return null;
+        }
+
+        return new BeverageDTO(
+                beverage.getId(),
+                beverage.getBeverageName(),
+                beverage.getType(),
+                beverage.getAbv(),
+                beverage.getDescription(),
+                beverage.getImg_url(),
+                beverage.getCreatedAt()
+        );
+    }
+
+    private Beverage toEntity(BeverageDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        return new Beverage(
+                dto.getId(),
+                dto.getBeverageName(),
+                dto.getType(),
+                dto.getAbv(),
+                dto.getDescription(),
+                dto.getImgUrl(),
+                dto.getCreatedAt()
+        );
+    }
+
+    private List<BeverageDTO> toDTOList(List<Beverage> beverages) {
+        if (beverages == null) {
+            return List.of();
+        }
+
+        return beverages.stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    private List<Beverage> toEntityList(List<BeverageDTO> dtos) {
+        if (dtos == null) {
+            return List.of();
+        }
+
+        return dtos.stream()
+                .map(this::toEntity)
+                .toList();
     }
 }

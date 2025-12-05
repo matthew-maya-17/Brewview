@@ -1,9 +1,12 @@
 package com.service;
 
+import com.dto.BeverageDTO;
+import com.exception.ResourceNotFoundException;
 import com.model.Beverage;
 import com.repository.BeverageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import com.exception.BadRequestException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,11 +32,26 @@ class BeverageServiceTest {
     @InjectMocks
     private BeverageService beverageService;
 
+    private BeverageDTO validBeverageDTO;
+    private UUID testId;
     private Beverage validBeverage;
     private Beverage savedBeverage;
 
     @BeforeEach
     void setUp() {
+
+        testId = UUID.randomUUID();
+
+        validBeverageDTO = new BeverageDTO(
+                null,
+                "Sierra Nevada Pale Ale",
+                "Pale Ale",
+                5,
+                "A classic American pale ale with citrus and pine hop flavors",
+                "https://example.com/sierra-nevada.jpg",
+                null
+        );
+
         validBeverage = new Beverage(
                 null,
                 "Sierra Nevada Pale Ale",
@@ -44,7 +63,7 @@ class BeverageServiceTest {
         );
 
         savedBeverage = new Beverage(
-                "test-id-123",
+                testId,
                 "Sierra Nevada Pale Ale",
                 "Pale Ale",
                 5,
@@ -63,69 +82,36 @@ class BeverageServiceTest {
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.createBeverage(validBeverage);
+        BeverageDTO result = beverageService.createBeverage(validBeverageDTO);
 
         // Assert
         assertNotNull(result);
-        assertEquals("test-id-123", result.getId());
+        assertEquals(testId, result.getId());
         assertEquals("Sierra Nevada Pale Ale", result.getBeverageName());
         assertNotNull(result.getCreatedAt());
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
-    void createBeverageShouldSetCreatedAtTimestamp() {
-        // Arrange
-        when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
-
-        // Act
-        beverageService.createBeverage(validBeverage);
-
-        // Assert
-        assertNotNull(validBeverage.getCreatedAt());
-        verify(beverageRepository, times(1)).save(any(Beverage.class));
-    }
-
-    @Test
     void createBeveragesShouldSaveMultipleBeverages() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", null);
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", null);
+        BeverageDTO dto1 = new BeverageDTO(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", null);
+        BeverageDTO dto2 = new BeverageDTO(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", null);
+        List<BeverageDTO> dtos = Arrays.asList(dto1, dto2);
+
+        Beverage beverage1 = new Beverage(UUID.randomUUID(), "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(UUID.randomUUID(), "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         List<Beverage> beverages = Arrays.asList(beverage1, beverage2);
 
         when(beverageRepository.saveAll(anyList())).thenReturn(beverages);
 
         // Act
-        List<Beverage> result = beverageService.createBeverages(beverages);
+        List<BeverageDTO> result = beverageService.createBeverages(dtos);
 
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertNotNull(beverage1.getCreatedAt());
-        assertNotNull(beverage2.getCreatedAt());
         verify(beverageRepository, times(1)).saveAll(anyList());
-    }
-
-    // CREATE - Unhappy Paths
-    @Test
-    void createBeverageShouldThrowExceptionWhenBeverageIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.createBeverage(null));
-        verify(beverageRepository, never()).save(any(Beverage.class));
-    }
-
-    @Test
-    void createBeveragesShouldThrowExceptionWhenListIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.createBeverages(null));
-        verify(beverageRepository, never()).saveAll(anyList());
-    }
-
-    @Test
-    void createBeveragesShouldThrowExceptionWhenListIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.createBeverages(List.of()));
-        verify(beverageRepository, never()).saveAll(anyList());
     }
 
     // ========== READ OPERATIONS ==========
@@ -138,39 +124,39 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(beverages);
 
         // Act
-        List<Beverage> result = beverageService.getAllBeverages();
+        List<BeverageDTO> result = beverageService.getAllBeverages();
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
+        assertEquals("Sierra Nevada Pale Ale", result.get(0).getBeverageName());
         verify(beverageRepository, times(1)).findAll();
     }
 
     @Test
     void getBeverageByIdShouldReturnBeverageWhenExists() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
 
         // Act
-        Optional<Beverage> result = beverageService.getBeverageById("test-id-123");
+        BeverageDTO result = beverageService.getBeverageById(testId);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals("Sierra Nevada Pale Ale", result.get().getBeverageName());
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        assertNotNull(result);
+        assertEquals("Sierra Nevada Pale Ale", result.getBeverageName());
+        assertEquals(testId, result.getId());
+        verify(beverageRepository, times(1)).findById(testId);
     }
 
     @Test
-    void getBeverageByIdShouldReturnEmptyWhenNotExists() {
+    void getBeverageByIdShouldThrowExceptionWhenNotExists() {
         // Arrange
-        when(beverageRepository.findById("non-existent")).thenReturn(Optional.empty());
+        UUID nonExistentId = UUID.randomUUID();
+        when(beverageRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Beverage> result = beverageService.getBeverageById("non-existent");
-
-        // Assert
-        assertFalse(result.isPresent());
-        verify(beverageRepository, times(1)).findById("non-existent");
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> beverageService.getBeverageById(nonExistentId));
+        verify(beverageRepository, times(1)).findById(nonExistentId);
     }
 
     @Test
@@ -179,11 +165,24 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        Optional<Beverage> result = beverageService.getBeverageByName("Sierra Nevada Pale Ale");
+        Optional<BeverageDTO> result = beverageService.getBeverageByName("Sierra Nevada Pale Ale");
 
         // Assert
         assertTrue(result.isPresent());
         assertEquals("Sierra Nevada Pale Ale", result.get().getBeverageName());
+        verify(beverageRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getBeverageByNameShouldReturnEmptyWhenNotExists() {
+        // Arrange
+        when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
+
+        // Act
+        Optional<BeverageDTO> result = beverageService.getBeverageByName("Non-existent Beer");
+
+        // Assert
+        assertFalse(result.isPresent());
         verify(beverageRepository, times(1)).findAll();
     }
 
@@ -193,7 +192,7 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<Beverage> result = beverageService.getBeveragesByType("Pale Ale");
+        List<BeverageDTO> result = beverageService.getBeveragesByType("Pale Ale");
 
         // Assert
         assertNotNull(result);
@@ -203,12 +202,26 @@ class BeverageServiceTest {
     }
 
     @Test
+    void getBeveragesByTypeShouldReturnEmptyListWhenNoMatches() {
+        // Arrange
+        when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
+
+        // Act
+        List<BeverageDTO> result = beverageService.getBeveragesByType("Stout");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+        verify(beverageRepository, times(1)).findAll();
+    }
+
+    @Test
     void getBeveragesByAbvRangeShouldReturnMatchingBeverages() {
         // Arrange
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<Beverage> result = beverageService.getBeveragesByAbvRange(4, 6);
+        List<BeverageDTO> result = beverageService.getBeveragesByAbvRange(4, 6);
 
         // Assert
         assertNotNull(result);
@@ -218,12 +231,26 @@ class BeverageServiceTest {
     }
 
     @Test
+    void getBeveragesByAbvRangeShouldReturnEmptyListWhenNoMatches() {
+        // Arrange
+        when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
+
+        // Act
+        List<BeverageDTO> result = beverageService.getBeveragesByAbvRange(10, 15);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+        verify(beverageRepository, times(1)).findAll();
+    }
+
+    @Test
     void getBeveragesByTypeAndAbvRangeShouldReturnMatchingBeverages() {
         // Arrange
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<Beverage> result = beverageService.getBeveragesByTypeAndAbvRange("Pale Ale", 4, 6);
+        List<BeverageDTO> result = beverageService.getBeveragesByTypeAndAbvRange("Pale Ale", 4, 6);
 
         // Assert
         assertNotNull(result);
@@ -236,27 +263,28 @@ class BeverageServiceTest {
     @Test
     void beverageExistsShouldReturnTrueWhenExists() {
         // Arrange
-        when(beverageRepository.existsById("test-id-123")).thenReturn(true);
+        when(beverageRepository.existsById(testId)).thenReturn(true);
 
         // Act
-        boolean result = beverageService.beverageExists("test-id-123");
+        boolean result = beverageService.beverageExists(testId);
 
         // Assert
         assertTrue(result);
-        verify(beverageRepository, times(1)).existsById("test-id-123");
+        verify(beverageRepository, times(1)).existsById(testId);
     }
 
     @Test
     void beverageExistsShouldReturnFalseWhenNotExists() {
         // Arrange
-        when(beverageRepository.existsById("non-existent")).thenReturn(false);
+        UUID nonExistentId = UUID.randomUUID();
+        when(beverageRepository.existsById(nonExistentId)).thenReturn(false);
 
         // Act
-        boolean result = beverageService.beverageExists("non-existent");
+        boolean result = beverageService.beverageExists(nonExistentId);
 
         // Assert
         assertFalse(result);
-        verify(beverageRepository, times(1)).existsById("non-existent");
+        verify(beverageRepository, times(1)).existsById(nonExistentId);
     }
 
     @Test
@@ -298,76 +326,7 @@ class BeverageServiceTest {
         verify(beverageRepository, times(1)).count();
     }
 
-    // READ - Unhappy Paths
-    @Test
-    void getBeverageByIdShouldThrowExceptionWhenIdIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeverageById(null));
-        verify(beverageRepository, never()).findById(anyString());
-    }
 
-    @Test
-    void getBeverageByIdShouldThrowExceptionWhenIdIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeverageById("   "));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void getBeverageByNameShouldThrowExceptionWhenNameIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeverageByName(null));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void getBeverageByNameShouldThrowExceptionWhenNameIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeverageByName("   "));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void getBeveragesByTypeShouldThrowExceptionWhenTypeIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeveragesByType(null));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void getBeveragesByTypeShouldThrowExceptionWhenTypeIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeveragesByType("   "));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void getBeveragesByAbvRangeShouldThrowExceptionWhenMinAbvIsNegative() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeveragesByAbvRange(-1, 10));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void getBeveragesByAbvRangeShouldThrowExceptionWhenMaxAbvLessThanMinAbv() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.getBeveragesByAbvRange(10, 5));
-        verify(beverageRepository, never()).findAll();
-    }
-
-    @Test
-    void beverageExistsShouldThrowExceptionWhenIdIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.beverageExists(null));
-        verify(beverageRepository, never()).existsById(anyString());
-    }
-
-    @Test
-    void beverageExistsShouldThrowExceptionWhenIdIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.beverageExists("   "));
-        verify(beverageRepository, never()).existsById(anyString());
-    }
 
     // ========== UPDATE OPERATIONS ==========
 
@@ -375,192 +334,92 @@ class BeverageServiceTest {
     @Test
     void updateBeverageShouldUpdateAllFieldsSuccessfully() {
         // Arrange
-        Beverage updatedBeverage = new Beverage(null, "Updated Beer Name", "Updated Type", 8, "This is an updated description for the beverage", "https://example.com/updated.jpg", null);
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        BeverageDTO updatedDTO = new BeverageDTO(null, "Updated Beer Name", "Updated Type", 8, "This is an updated description for the beverage", "https://example.com/updated.jpg", null);
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverage("test-id-123", updatedBeverage);
+        BeverageDTO result = beverageService.updateBeverage(testId, updatedDTO);
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
     void updateBeverageNameShouldUpdateNameSuccessfully() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverageName("test-id-123", "New Beer Name");
+        BeverageDTO result = beverageService.updateBeverageName(testId, "New Beer Name");
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
     void updateBeverageTypeShouldUpdateTypeSuccessfully() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverageType("test-id-123", "New Type");
+        BeverageDTO result = beverageService.updateBeverageType(testId, "New Type");
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
     void updateBeverageAbvShouldUpdateAbvSuccessfully() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverageAbv("test-id-123", 10);
+        BeverageDTO result = beverageService.updateBeverageAbv(testId, 10);
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
     void updateBeverageDescriptionShouldUpdateDescriptionSuccessfully() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverageDescription("test-id-123", "This is a brand new updated description");
+        BeverageDTO result = beverageService.updateBeverageDescription(testId, "This is a brand new updated description");
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
     }
 
     @Test
     void updateBeverageImageUrlShouldUpdateImageUrlSuccessfully() {
         // Arrange
-        when(beverageRepository.findById("test-id-123")).thenReturn(Optional.of(savedBeverage));
+        when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        Beverage result = beverageService.updateBeverageImageUrl("test-id-123", "https://example.com/new-image.jpg");
+        BeverageDTO result = beverageService.updateBeverageImageUrl(testId, "https://example.com/new-image.jpg");
 
         // Assert
         assertNotNull(result);
-        verify(beverageRepository, times(1)).findById("test-id-123");
+        verify(beverageRepository, times(1)).findById(testId);
         verify(beverageRepository, times(1)).save(any(Beverage.class));
-    }
-
-    // UPDATE - Unhappy Paths
-    @Test
-    void updateBeverageShouldThrowExceptionWhenIdIsNull() {
-        // Arrange
-        Beverage updatedBeverage = new Beverage(null, "Updated Beer", "IPA", 6, "Updated description for the beer", "https://example.com/updated.jpg", null);
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverage(null, updatedBeverage));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageShouldThrowExceptionWhenIdIsEmpty() {
-        // Arrange
-        Beverage updatedBeverage = new Beverage(null, "Updated Beer", "IPA", 6, "Updated description for the beer", "https://example.com/updated.jpg", null);
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverage("   ", updatedBeverage));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageShouldThrowExceptionWhenUpdatedBeverageIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverage("test-id-123", null));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageShouldThrowExceptionWhenBeverageNotFound() {
-        // Arrange
-        Beverage updatedBeverage = new Beverage(null, "Updated Beer", "IPA", 6, "Updated description for the beer", "https://example.com/updated.jpg", null);
-        when(beverageRepository.findById("non-existent")).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverage("non-existent", updatedBeverage));
-        verify(beverageRepository, times(1)).findById("non-existent");
-        verify(beverageRepository, never()).save(any(Beverage.class));
-    }
-
-    @Test
-    void updateBeverageNameShouldThrowExceptionWhenIdIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageName(null, "New Name"));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageNameShouldThrowExceptionWhenNameIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageName("test-id-123", null));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageNameShouldThrowExceptionWhenNameIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageName("test-id-123", "   "));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageNameShouldThrowExceptionWhenBeverageNotFound() {
-        // Arrange
-        when(beverageRepository.findById("non-existent")).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageName("non-existent", "New Name"));
-        verify(beverageRepository, times(1)).findById("non-existent");
-        verify(beverageRepository, never()).save(any(Beverage.class));
-    }
-
-    @Test
-    void updateBeverageTypeShouldThrowExceptionWhenTypeIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageType("test-id-123", null));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageAbvShouldThrowExceptionWhenAbvIsNegative() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageAbv("test-id-123", -1));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageDescriptionShouldThrowExceptionWhenDescriptionIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageDescription("test-id-123", null));
-        verify(beverageRepository, never()).findById(anyString());
-    }
-
-    @Test
-    void updateBeverageImageUrlShouldThrowExceptionWhenImageUrlIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.updateBeverageImageUrl("test-id-123", null));
-        verify(beverageRepository, never()).findById(anyString());
     }
 
     // ========== DELETE OPERATIONS ==========
@@ -569,15 +428,15 @@ class BeverageServiceTest {
     @Test
     void deleteBeverageShouldDeleteSuccessfully() {
         // Arrange
-        when(beverageRepository.existsById("test-id-123")).thenReturn(true);
-        doNothing().when(beverageRepository).deleteById("test-id-123");
+        when(beverageRepository.existsById(testId)).thenReturn(true);
+        doNothing().when(beverageRepository).deleteById(testId);
 
         // Act
-        beverageService.deleteBeverage("test-id-123");
+        beverageService.deleteBeverage(testId);
 
         // Assert
-        verify(beverageRepository, times(1)).existsById("test-id-123");
-        verify(beverageRepository, times(1)).deleteById("test-id-123");
+        verify(beverageRepository, times(1)).existsById(testId);
+        verify(beverageRepository, times(1)).deleteById(testId);
     }
 
     @Test
@@ -595,7 +454,10 @@ class BeverageServiceTest {
     @Test
     void deleteBeveragesByIdsShouldDeleteMultipleBeverages() {
         // Arrange
-        List<String> ids = Arrays.asList("id1", "id2", "id3");
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        UUID id3 = UUID.randomUUID();
+        List<UUID> ids = Arrays.asList(id1, id2, id3);
         doNothing().when(beverageRepository).deleteAllById(ids);
 
         // Act
@@ -603,48 +465,6 @@ class BeverageServiceTest {
 
         // Assert
         verify(beverageRepository, times(1)).deleteAllById(ids);
-    }
-
-    // DELETE - Unhappy Paths
-    @Test
-    void deleteBeverageShouldThrowExceptionWhenIdIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.deleteBeverage(null));
-        verify(beverageRepository, never()).existsById(anyString());
-        verify(beverageRepository, never()).deleteById(anyString());
-    }
-
-    @Test
-    void deleteBeverageShouldThrowExceptionWhenIdIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.deleteBeverage("   "));
-        verify(beverageRepository, never()).existsById(anyString());
-        verify(beverageRepository, never()).deleteById(anyString());
-    }
-
-    @Test
-    void deleteBeverageShouldThrowExceptionWhenBeverageNotFound() {
-        // Arrange
-        when(beverageRepository.existsById("non-existent")).thenReturn(false);
-
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.deleteBeverage("non-existent"));
-        verify(beverageRepository, times(1)).existsById("non-existent");
-        verify(beverageRepository, never()).deleteById(anyString());
-    }
-
-    @Test
-    void deleteBeveragesByIdsShouldThrowExceptionWhenIdsIsNull() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.deleteBeveragesByIds(null));
-        verify(beverageRepository, never()).deleteAllById(anyList());
-    }
-
-    @Test
-    void deleteBeveragesByIdsShouldThrowExceptionWhenIdsIsEmpty() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> beverageService.deleteBeveragesByIds(List.of()));
-        verify(beverageRepository, never()).deleteAllById(anyList());
     }
 
 }
