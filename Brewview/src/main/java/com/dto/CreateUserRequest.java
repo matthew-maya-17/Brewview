@@ -14,8 +14,8 @@ public class CreateUserRequest {
     @NotBlank(message = "Username is required")
     @Size(min = 6, max = 254, message = "Username must be between 6 and 254 characters")
     @Pattern(
-            regexp = "^[A-Za-z][A-Za-z0-9._]{5,253}$",
-            message = "Username must start with a letter and can contain letters, numbers, dots, or underscores"
+            regexp = "^[A-Za-z][A-Za-z0-9._-]{5,253}$",
+            message = "Username must start with a letter and can contain letters, numbers, dots, underscores, or hyphens"
     )
     private String username;
 
