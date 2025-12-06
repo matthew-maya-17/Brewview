@@ -235,6 +235,7 @@ public class UserController {
                     )
             }
     )
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ResponseUser> updateUserById(
             @Parameter(

@@ -1,11 +1,10 @@
 BEGIN;
 
-
 -- Users
 INSERT INTO users (username, email, password_hash, role_name) VALUES
-("admin_user", "admin@example.com", "$2b$10$0921", "admin"),
-("alex_rodgers", "alex@example.com", "$2b$10$678", "customer"),
-("jane_smith", "jane@example.com", "$2b$10$190", "customer"),
+("admin_user", "admin@example.com", "P@ssword12345", "ROLE_ADMIN"),
+("alex_rodgers", "alex@example.com", "Pa$$word12345", "ROLE_USER"),
+("jane_smith", "jane@example.com", "SuperH@rdP@ssword12345", "ROLE_USER"),
 
 -- Locations
 INSERT INTO locations (location_name, address, city, country) VALUES
