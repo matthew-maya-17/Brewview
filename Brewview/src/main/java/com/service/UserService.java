@@ -11,6 +11,7 @@ import com.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -82,6 +83,7 @@ public class UserService {
     }
 
     //UPDATE
+    @Transactional
     @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     public ResponseUser updateUserById(UUID id, UpdateUserRequest updateRequest){
         // Find existing user
