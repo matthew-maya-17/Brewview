@@ -121,7 +121,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistBeverageWithMinLengthDescription() {
         // Arrange - description exactly 25 characters (minimum)
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer!!", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer!!!", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
