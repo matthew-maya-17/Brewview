@@ -1,13 +1,26 @@
 package com.dto;
 
-import java.time.LocalDateTime;
+import com.model.Role;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Schema(description = "User Response DTO")
 public class ResponseUser {
 
-    private String id;
+    @Schema(description = "User's unique ID", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
+    @Schema(description = "Username", example = "example-username")
     private String username;
+    @Schema(description = "Email", example = "example-username@aol.com")
     private String email;
-    private String roleName;
+    @Schema(description = "User role", example = "ROLE_USER")
+    private Role roleName;
+    @Schema(
+            description = "Timestamp indicating when the user account was created",
+            example = "2024-01-15T13:45:30"
+    )
     private LocalDateTime createdAt;
 
     // Note: NO passwordHash - never expose passwords!
@@ -15,7 +28,7 @@ public class ResponseUser {
     // Constructors
     public ResponseUser() {}
 
-    public ResponseUser(String id, String username, String email, String roleName, LocalDateTime createdAt) {
+    public ResponseUser(UUID id, String username, String email, Role roleName, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -24,11 +37,11 @@ public class ResponseUser {
     }
 
     // Getters and Setters
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -48,11 +61,11 @@ public class ResponseUser {
         this.email = email;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
 

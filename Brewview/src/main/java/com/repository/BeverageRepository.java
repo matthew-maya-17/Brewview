@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface BeverageRepository extends JpaRepository<Beverage, String>{
+public interface BeverageRepository extends JpaRepository<Beverage, UUID>{
 
     Optional<Beverage> findByBeverageName(String beverageName);
 

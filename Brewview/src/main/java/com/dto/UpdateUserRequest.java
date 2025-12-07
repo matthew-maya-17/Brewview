@@ -1,25 +1,48 @@
 package com.dto;
 
 
+import com.model.Role;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "Request DTO for updating a user")
 public class UpdateUserRequest {
 
+    @Schema(description = "Updated username", example = "updated-username")
     @Size(min = 6, max = 254, message = "Username must be between 6 and 254 characters")
+    @Pattern(
+            regexp = "^[A-Za-z][A-Za-z0-9._-]{5,253}$",
+            message = "Username must start with a letter and can contain letters, numbers, dots, underscores, or hyphens"
+    )
     private String username;
 
+    @Schema(description = "Updated email address", example = "updated-email@gmail.com")
     @Email(message = "Email must be valid")
     @Size(min = 6, max = 254, message = "Email must be between 6 and 254 characters")
     private String email;
 
+    @Schema(description = "Updated password", example = "updated-password123")
     @Size(min = 8, message = "Password must be at least 8 characters")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            message = "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
+    )
     private String password;
 
-    private String roleName;
+    @Schema(description = "Updated user role", example = "ROLE_ADMIN")
+    private Role roleName;
 
     // Constructors
     public UpdateUserRequest() {}
+
+    public UpdateUserRequest(String username, String email, String password, Role roleName) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roleName = roleName;
+    }
 
     // Getters and Setters
     public String getUsername() {
@@ -46,11 +69,11 @@ public class UpdateUserRequest {
         this.password = password;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
 }

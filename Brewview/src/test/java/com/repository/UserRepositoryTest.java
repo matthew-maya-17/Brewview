@@ -1,5 +1,6 @@
 package com.repository;
 
+import com.model.Role;
 import com.model.User;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +30,7 @@ class UserRepositoryTest {
                 "validuser",
                 "valid@example.com",
                 "rx2t43cy1v13u4bi7no98m",
-                "ADMIN",
+                Role.ROLE_ADMIN,
                 LocalDateTime.now()
         );
     }
@@ -47,7 +49,7 @@ class UserRepositoryTest {
         assertEquals("validuser", savedUser.getUsername());
         assertEquals("valid@example.com", savedUser.getEmail());
         assertEquals("rx2t43cy1v13u4bi7no98m", savedUser.getPasswordHash());
-        assertEquals("ADMIN", savedUser.getRoleName());
+        assertEquals(Role.ROLE_ADMIN, savedUser.getRoleName());
         assertNotNull(savedUser.getTimestamp());
     }
 
@@ -58,14 +60,13 @@ class UserRepositoryTest {
 
         // Assert
         assertNotNull(savedUser.getId());
-        assertFalse(savedUser.getId().isEmpty());
     }
 
     @Test
     void saveShouldPersistMultipleUsers() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "ADMIN", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_ADMIN, LocalDateTime.now());
 
         // Act
         userRepository.save(user1);
@@ -78,7 +79,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldPersistUserWithMinLengthUsername() {
         // Arrange - username exactly 6 characters (minimum)
-        User user = new User("sixchr", "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User("sixchr", "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act
         User savedUser = userRepository.save(user);
@@ -92,7 +93,7 @@ class UserRepositoryTest {
     void saveShouldPersistUserWithMaxLengthUsername() {
         // Arrange - username exactly 254 characters (maximum)
         String maxUsername = "a".repeat(254);
-        User user = new User(maxUsername, "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User(maxUsername, "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act
         User savedUser = userRepository.save(user);
@@ -105,9 +106,9 @@ class UserRepositoryTest {
     @Test
     void saveShouldPersistUserWithValidEmailFormats() {
         // Arrange
-        User user1 = new User("user1", "test@example.com", "hash", "USER", LocalDateTime.now());
-        User user2 = new User("user2", "test.email@example.co.uk", "hash", "USER", LocalDateTime.now());
-        User user3 = new User("user3", "test+tag@example.com", "hash", "USER", LocalDateTime.now());
+        User user1 = new User("user1", "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("user2", "test.email@example.co.uk", "hash", Role.ROLE_USER, LocalDateTime.now());
+        User user3 = new User("user3", "test+tag@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertDoesNotThrow(() -> userRepository.save(user1));
@@ -119,7 +120,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenUsernameIsNull() {
         // Arrange
-        User user = new User(null, "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User(null, "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> userRepository.saveAndFlush(user));
@@ -128,7 +129,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenUsernameIsBlank() {
         // Arrange
-        User user = new User("   ", "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User("   ", "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -137,7 +138,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenUsernameTooShort() {
         // Arrange - username less than 6 characters
-        User user = new User("short", "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User("short", "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -147,7 +148,7 @@ class UserRepositoryTest {
     void saveShouldThrowExceptionWhenUsernameTooLong() {
         // Arrange - username more than 254 characters
         String tooLongUsername = "a".repeat(255);
-        User user = new User(tooLongUsername, "test@example.com", "hash", "USER", LocalDateTime.now());
+        User user = new User(tooLongUsername, "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -156,7 +157,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenEmailIsNull() {
         // Arrange
-        User user = new User("validuser", null, "hash", "USER", LocalDateTime.now());
+        User user = new User("validuser", null, "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> userRepository.saveAndFlush(user));
@@ -165,7 +166,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenEmailIsInvalid() {
         // Arrange
-        User user = new User("validuser", "invalid-email", "hash", "USER", LocalDateTime.now());
+        User user = new User("validuser", "invalid-email", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -174,7 +175,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenEmailTooShort() {
         // Arrange - email less than 6 characters
-        User user = new User("validuser", "a@b.c", "hash", "USER", LocalDateTime.now());
+        User user = new User("validuser", "a@b.c", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -184,7 +185,7 @@ class UserRepositoryTest {
     void saveShouldThrowExceptionWhenEmailTooLong() {
         // Arrange - email more than 254 characters
         String tooLongEmail = "a".repeat(245) + "@example.com"; // 255 characters
-        User user = new User("validuser", tooLongEmail, "hash", "USER", LocalDateTime.now());
+        User user = new User("validuser", tooLongEmail, "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -193,7 +194,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenPasswordHashIsNull() {
         // Arrange
-        User user = new User("validuser", "test@example.com", null, "USER", LocalDateTime.now());
+        User user = new User("validuser", "test@example.com", null, Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> userRepository.saveAndFlush(user));
@@ -202,7 +203,7 @@ class UserRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenPasswordHashIsBlank() {
         // Arrange
-        User user = new User("validuser", "test@example.com", "   ", "USER", LocalDateTime.now());
+        User user = new User("validuser", "test@example.com", "   ", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -219,18 +220,19 @@ class UserRepositoryTest {
 
     @Test
     void saveShouldThrowExceptionWhenRoleNameIsBlank() {
-        // Arrange
-        User user = new User("validuser", "test@example.com", "hash", "   ", LocalDateTime.now());
+        // Arrange - Note: Role is an enum, so blank values aren't possible. This test may need to be removed or adjusted.
+        // For now, we'll test with null which is the closest equivalent
+        User user = new User("validuser", "test@example.com", "hash", null, LocalDateTime.now());
 
         // Act & Assert
-        assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(user));
+        assertThrows(Exception.class, () -> userRepository.saveAndFlush(user));
     }
 
     @Test
     void saveShouldThrowExceptionWhenUsernameIsDuplicate() {
         // Arrange
         userRepository.save(validUser);
-        User duplicateUser = new User("validuser", "different@example.com", "hash", "USER", LocalDateTime.now());
+        User duplicateUser = new User("validuser", "different@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(duplicateUser));
@@ -240,7 +242,7 @@ class UserRepositoryTest {
     void saveShouldThrowExceptionWhenEmailIsDuplicate() {
         // Arrange
         userRepository.save(validUser);
-        User duplicateUser = new User("differentuser", "valid@example.com", "hash", "USER", LocalDateTime.now());
+        User duplicateUser = new User("differentuser", "valid@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(duplicateUser));
@@ -253,7 +255,7 @@ class UserRepositoryTest {
     void findByIdShouldReturnUserWhenExists() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         Optional<User> foundUser = userRepository.findById(userId);
@@ -267,8 +269,8 @@ class UserRepositoryTest {
     @Test
     void findAllShouldReturnAllUsers() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "ADMIN", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_ADMIN, LocalDateTime.now());
         userRepository.save(user1);
         userRepository.save(user2);
 
@@ -283,7 +285,7 @@ class UserRepositoryTest {
     void existsByIdShouldReturnTrueWhenUserExists() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         boolean exists = userRepository.existsById(userId);
@@ -295,8 +297,8 @@ class UserRepositoryTest {
     @Test
     void countShouldReturnCorrectNumberOfUsers() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "ADMIN", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_ADMIN, LocalDateTime.now());
         userRepository.save(user1);
         userRepository.save(user2);
 
@@ -311,7 +313,7 @@ class UserRepositoryTest {
     @Test
     void findByIdShouldReturnEmptyWhenUserDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act
         Optional<User> foundUser = userRepository.findById(nonExistentId);
@@ -331,7 +333,7 @@ class UserRepositoryTest {
     @Test
     void existsByIdShouldReturnFalseWhenUserDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act
         boolean exists = userRepository.existsById(nonExistentId);
@@ -358,6 +360,98 @@ class UserRepositoryTest {
         assertEquals(0, count);
     }
 
+    @Test
+    void findUserByUsernameShouldReturnUserWhenExists() {
+        // Arrange
+        User savedUser = userRepository.save(validUser);
+        String username = savedUser.getUsername();
+
+        // Act
+        Optional<User> foundUser = userRepository.findUserByUsername(username);
+
+        // Assert
+        assertTrue(foundUser.isPresent());
+        assertEquals("validuser", foundUser.get().getUsername());
+        assertEquals("valid@example.com", foundUser.get().getEmail());
+        assertEquals(savedUser.getId(), foundUser.get().getId());
+    }
+
+    @Test
+    void findUserByUsernameShouldReturnEmptyWhenUserDoesNotExist() {
+        // Arrange
+        String nonExistentUsername = "nonexistentuser";
+
+        // Act
+        Optional<User> foundUser = userRepository.findUserByUsername(nonExistentUsername);
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void findUserByUsernameShouldReturnEmptyWhenUsernameIsNull() {
+        // Act
+        Optional<User> foundUser = userRepository.findUserByUsername(null);
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void findUserByUsernameShouldReturnEmptyWhenUsernameIsBlank() {
+        // Act
+        Optional<User> foundUser = userRepository.findUserByUsername("   ");
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void findUserByEmailShouldReturnUserWhenExists() {
+        // Arrange
+        User savedUser = userRepository.save(validUser);
+        String email = savedUser.getEmail();
+
+        // Act
+        Optional<User> foundUser = userRepository.findUserByEmail(email);
+
+        // Assert
+        assertTrue(foundUser.isPresent());
+        assertEquals("validuser", foundUser.get().getUsername());
+        assertEquals("valid@example.com", foundUser.get().getEmail());
+        assertEquals(savedUser.getId(), foundUser.get().getId());
+    }
+
+    @Test
+    void findUserByEmailShouldReturnEmptyWhenUserDoesNotExist() {
+        // Arrange
+        String nonExistentEmail = "nonexistent@example.com";
+
+        // Act
+        Optional<User> foundUser = userRepository.findUserByEmail(nonExistentEmail);
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void findUserByEmailShouldReturnEmptyWhenEmailIsNull() {
+        // Act
+        Optional<User> foundUser = userRepository.findUserByEmail(null);
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    void findUserByEmailShouldReturnEmptyWhenEmailIsBlank() {
+        // Act
+        Optional<User> foundUser = userRepository.findUserByEmail("   ");
+
+        // Assert
+        assertFalse(foundUser.isPresent());
+    }
+
     // ========== UPDATE OPERATIONS ==========
 
     // UPDATE - Happy Paths
@@ -365,7 +459,7 @@ class UserRepositoryTest {
     void updateUsernameShouldPersistChanges() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         savedUser.setUsername("updateduser");
@@ -380,7 +474,7 @@ class UserRepositoryTest {
     void updateEmailShouldPersistChanges() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         savedUser.setEmail("updated@example.com");
@@ -395,7 +489,7 @@ class UserRepositoryTest {
     void updatePasswordHashShouldPersistChanges() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         savedUser.setPasswordHash("newhash123");
@@ -410,28 +504,28 @@ class UserRepositoryTest {
     void updateRoleNameShouldPersistChanges() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
-        savedUser.setRoleName("MODERATOR");
+        savedUser.setRoleName(Role.ROLE_MODERATOR);
         userRepository.save(savedUser);
         User updatedUser = userRepository.findById(userId).orElseThrow();
 
         // Assert
-        assertEquals("MODERATOR", updatedUser.getRoleName());
+        assertEquals(Role.ROLE_MODERATOR, updatedUser.getRoleName());
     }
 
     @Test
     void updateMultipleFieldsShouldPersistAllChanges() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         savedUser.setUsername("multiuser");
         savedUser.setEmail("multi@example.com");
         savedUser.setPasswordHash("multihash");
-        savedUser.setRoleName("MODERATOR");
+        savedUser.setRoleName(Role.ROLE_MODERATOR);
         userRepository.save(savedUser);
         User updatedUser = userRepository.findById(userId).orElseThrow();
 
@@ -439,7 +533,7 @@ class UserRepositoryTest {
         assertEquals("multiuser", updatedUser.getUsername());
         assertEquals("multi@example.com", updatedUser.getEmail());
         assertEquals("multihash", updatedUser.getPasswordHash());
-        assertEquals("MODERATOR", updatedUser.getRoleName());
+        assertEquals(Role.ROLE_MODERATOR, updatedUser.getRoleName());
     }
 
     // UPDATE - Unhappy Paths
@@ -476,8 +570,8 @@ class UserRepositoryTest {
     @Test
     void updateUsernameToDuplicateShouldThrowException() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "USER", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_USER, LocalDateTime.now());
         userRepository.save(user1);
         User savedUser2 = userRepository.save(user2);
 
@@ -509,8 +603,8 @@ class UserRepositoryTest {
     @Test
     void updateEmailToDuplicateShouldThrowException() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "USER", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_USER, LocalDateTime.now());
         userRepository.save(user1);
         User savedUser2 = userRepository.save(user2);
 
@@ -555,8 +649,9 @@ class UserRepositoryTest {
         User savedUser = userRepository.save(validUser);
 
         // Act & Assert
-        savedUser.setRoleName("   ");
-        assertThrows(ConstraintViolationException.class, () -> userRepository.saveAndFlush(savedUser));
+        // Note: Role is an enum, so blank values aren't possible. Testing null instead.
+        savedUser.setRoleName(null);
+        assertThrows(Exception.class, () -> userRepository.saveAndFlush(savedUser));
     }
 
     // ========== DELETE OPERATIONS ==========
@@ -566,7 +661,7 @@ class UserRepositoryTest {
     void deleteByIdShouldRemoveUser() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         userRepository.deleteById(userId);
@@ -580,7 +675,7 @@ class UserRepositoryTest {
     void deleteByEntityShouldRemoveUser() {
         // Arrange
         User savedUser = userRepository.save(validUser);
-        String userId = savedUser.getId();
+        UUID userId = savedUser.getId();
 
         // Act
         userRepository.delete(savedUser);
@@ -592,8 +687,8 @@ class UserRepositoryTest {
     @Test
     void deleteAllShouldRemoveAllUsers() {
         // Arrange
-        User user1 = new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now());
-        User user2 = new User("usertwo", "user2@example.com", "hash2", "ADMIN", LocalDateTime.now());
+        User user1 = new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now());
+        User user2 = new User("usertwo", "user2@example.com", "hash2", Role.ROLE_ADMIN, LocalDateTime.now());
         userRepository.save(user1);
         userRepository.save(user2);
 
@@ -607,9 +702,9 @@ class UserRepositoryTest {
     @Test
     void deleteAllByIdShouldRemoveSelectedUsers() {
         // Arrange
-        User user1 = userRepository.save(new User("userone", "user1@example.com", "hash1", "USER", LocalDateTime.now()));
-        User user2 = userRepository.save(new User("usertwo", "user2@example.com", "hash2", "ADMIN", LocalDateTime.now()));
-        User user3 = userRepository.save(new User("userthree", "user3@example.com", "hash3", "USER", LocalDateTime.now()));
+        User user1 = userRepository.save(new User("userone", "user1@example.com", "hash1", Role.ROLE_USER, LocalDateTime.now()));
+        User user2 = userRepository.save(new User("usertwo", "user2@example.com", "hash2", Role.ROLE_ADMIN, LocalDateTime.now()));
+        User user3 = userRepository.save(new User("userthree", "user3@example.com", "hash3", Role.ROLE_USER, LocalDateTime.now()));
 
         // Act
         userRepository.deleteAllById(List.of(user1.getId(), user2.getId()));
@@ -623,7 +718,7 @@ class UserRepositoryTest {
     @Test
     void deleteByIdShouldNotThrowExceptionWhenUserDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act & Assert - Should not throw exception
         assertDoesNotThrow(() -> userRepository.deleteById(nonExistentId));

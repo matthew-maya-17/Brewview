@@ -1,6 +1,5 @@
-package com.model;
+package com.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,47 +8,36 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "beverages")
-public class Beverage {
+public class ResponseBeverage {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "beverage_id")
     private UUID id;
 
-    @Column(unique = true, nullable = false, name = "beverage_name")
-    @NotBlank
-    @Size(message = "The Beverage name must be between 6 and 254 characters!", min = 6, max = 254)
+    @NotBlank(message = "Beverage name cannot be blank")
+    @Size(min = 6, max = 254, message = "The Beverage name must be between 6 and 254 characters!")
     private String beverageName;
 
-    @Column(unique = true, nullable = false)
-    @NotBlank
-    @Size(message = "The Beverage Type must be between 3 and 254 characters!", min = 3, max = 254)
+    @NotBlank(message = "Beverage type cannot be blank")
+    @Size(min = 3, max = 254, message = "The Beverage Type must be between 3 and 254 characters!")
     private String type;
 
-    @Column(name = "abv", nullable = false)
     @NotNull(message = "ABV cannot be null")
     @Min(value = 0, message = "ABV must be 0 or greater")
     private int abv;
 
-    @Column(unique = true, nullable = false)
-    @NotBlank
-    @Size(message = "The Beverage Description must be between 25 and 254 characters", min = 25, max = 254)
+    @NotBlank(message = "Description cannot be blank")
+    @Size(min = 25, max = 254, message = "The Beverage Description must be between 25 and 254 characters")
     private String description;
 
-    @Column(unique = true, nullable = false, name = "image_url")
-    @NotBlank
-    @Size(message = "The Beverage url must be a valid link and between 6 and 500 characters", min = 6, max = 500)
+    @NotBlank(message = "Image URL cannot be blank")
+    @Size(min = 6, max = 500, message = "The Beverage url must be a valid link and between 6 and 500 characters")
     private String imageUrl;
 
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Beverage() {
+    public ResponseBeverage() {
     }
 
-    public Beverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
+    public ResponseBeverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
