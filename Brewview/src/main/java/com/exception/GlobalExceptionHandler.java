@@ -39,11 +39,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleBadRequestException(ResourceNotFoundException e, HttpServletRequest request){
         ApiError errorResponse = new ApiError();
         errorResponse.setTimeStamp(LocalDateTime.now());
-        errorResponse.setStatus(HttpStatus.CONFLICT.value());
-        errorResponse.setError(HttpStatus.CONFLICT.getReasonPhrase());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
         errorResponse.setMessage(e.getMessage());
         errorResponse.setPath(request.getRequestURI());
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

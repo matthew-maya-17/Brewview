@@ -37,7 +37,7 @@ public class ResponseBeverage {
     public ResponseBeverage() {
     }
 
-    public ResponseBeverage(UUID id, String beverageName, String type, Integer abv, String description, String imageUrl, LocalDateTime createdAt) {
+    public ResponseBeverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
@@ -71,11 +71,11 @@ public class ResponseBeverage {
         this.type = type;
     }
 
-    public Integer getAbv() {
+    public int getAbv() {
         return abv;
     }
 
-    public void setAbv(Integer abv) {
+    public void setAbv(int abv) {
         this.abv = abv;
     }
 
