@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +51,7 @@ class BeverageRepositoryTest {
         assertEquals("Pale Ale", savedBeverage.getType());
         assertEquals(5, savedBeverage.getAbv());
         assertEquals("A classic American pale ale with citrus and pine hop flavors", savedBeverage.getDescription());
-        assertEquals("https://example.com/sierra-nevada.jpg", savedBeverage.getImg_url());
+        assertEquals("https://example.com/sierra-nevada.jpg", savedBeverage.getImageUrl());
         assertNotNull(savedBeverage.getCreatedAt());
     }
 
@@ -61,7 +62,6 @@ class BeverageRepositoryTest {
 
         // Assert
         assertNotNull(savedBeverage.getId());
-        assertFalse(savedBeverage.getId().isEmpty());
     }
 
     @Test
@@ -340,7 +340,7 @@ class BeverageRepositoryTest {
     void findByIdShouldReturnBeverageWhenExists() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         Optional<Beverage> foundBeverage = beverageRepository.findById(beverageId);
@@ -370,7 +370,7 @@ class BeverageRepositoryTest {
     void existsByIdShouldReturnTrueWhenBeverageExists() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         boolean exists = beverageRepository.existsById(beverageId);
@@ -398,7 +398,7 @@ class BeverageRepositoryTest {
     @Test
     void findByIdShouldReturnEmptyWhenBeverageDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act
         Optional<Beverage> foundBeverage = beverageRepository.findById(nonExistentId);
@@ -418,7 +418,7 @@ class BeverageRepositoryTest {
     @Test
     void existsByIdShouldReturnFalseWhenBeverageDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act
         boolean exists = beverageRepository.existsById(nonExistentId);
@@ -452,7 +452,7 @@ class BeverageRepositoryTest {
     void updateBeverageNameShouldPersistChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         savedBeverage.setBeverageName("Updated Beer Name");
@@ -467,7 +467,7 @@ class BeverageRepositoryTest {
     void updateTypeShouldPersistChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         savedBeverage.setType("Updated Type");
@@ -482,7 +482,7 @@ class BeverageRepositoryTest {
     void updateAbvShouldPersistChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         savedBeverage.setAbv(8);
@@ -497,7 +497,7 @@ class BeverageRepositoryTest {
     void updateDescriptionShouldPersistChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         savedBeverage.setDescription("This is an updated description for the beverage");
@@ -512,29 +512,29 @@ class BeverageRepositoryTest {
     void updateImgUrlShouldPersistChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
-        savedBeverage.setImg_url("https://example.com/updated-image.jpg");
+        savedBeverage.setImageUrl("https://example.com/updated-image.jpg");
         beverageRepository.save(savedBeverage);
         Beverage updatedBeverage = beverageRepository.findById(beverageId).orElseThrow();
 
         // Assert
-        assertEquals("https://example.com/updated-image.jpg", updatedBeverage.getImg_url());
+        assertEquals("https://example.com/updated-image.jpg", updatedBeverage.getImageUrl());
     }
 
     @Test
     void updateMultipleFieldsShouldPersistAllChanges() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         savedBeverage.setBeverageName("Multi Update Beer");
         savedBeverage.setType("Multi Type");
         savedBeverage.setAbv(10);
         savedBeverage.setDescription("This beverage has been updated in multiple ways");
-        savedBeverage.setImg_url("https://example.com/multi-update.jpg");
+        savedBeverage.setImageUrl("https://example.com/multi-update.jpg");
         beverageRepository.save(savedBeverage);
         Beverage updatedBeverage = beverageRepository.findById(beverageId).orElseThrow();
 
@@ -543,7 +543,7 @@ class BeverageRepositoryTest {
         assertEquals("Multi Type", updatedBeverage.getType());
         assertEquals(10, updatedBeverage.getAbv());
         assertEquals("This beverage has been updated in multiple ways", updatedBeverage.getDescription());
-        assertEquals("https://example.com/multi-update.jpg", updatedBeverage.getImg_url());
+        assertEquals("https://example.com/multi-update.jpg", updatedBeverage.getImageUrl());
     }
 
     // UPDATE - Unhappy Paths
@@ -682,7 +682,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url(null);
+        savedBeverage.setImageUrl(null);
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -692,7 +692,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url("   ");
+        savedBeverage.setImageUrl("   ");
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -702,7 +702,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url("a.jpg");
+        savedBeverage.setImageUrl("a.jpg");
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -715,7 +715,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
         // Act & Assert
-        savedBeverage2.setImg_url("https://example.com/guinness.jpg");
+        savedBeverage2.setImageUrl("https://example.com/guinness.jpg");
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage2));
     }
 
@@ -726,7 +726,7 @@ class BeverageRepositoryTest {
     void deleteByIdShouldRemoveBeverage() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         beverageRepository.deleteById(beverageId);
@@ -740,7 +740,7 @@ class BeverageRepositoryTest {
     void deleteByEntityShouldRemoveBeverage() {
         // Arrange
         Beverage savedBeverage = beverageRepository.save(validBeverage);
-        String beverageId = savedBeverage.getId();
+        UUID beverageId = savedBeverage.getId();
 
         // Act
         beverageRepository.delete(savedBeverage);
@@ -783,7 +783,7 @@ class BeverageRepositoryTest {
     @Test
     void deleteByIdShouldNotThrowExceptionWhenBeverageDoesNotExist() {
         // Arrange
-        String nonExistentId = "non-existent-id";
+        UUID nonExistentId = UUID.randomUUID();
 
         // Act & Assert - Should not throw exception
         assertDoesNotThrow(() -> beverageRepository.deleteById(nonExistentId));
