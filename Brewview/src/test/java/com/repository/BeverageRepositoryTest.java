@@ -51,7 +51,7 @@ class BeverageRepositoryTest {
         assertEquals("Pale Ale", savedBeverage.getType());
         assertEquals(5, savedBeverage.getAbv());
         assertEquals("A classic American pale ale with citrus and pine hop flavors", savedBeverage.getDescription());
-        assertEquals("https://example.com/sierra-nevada.jpg", savedBeverage.getImg_url());
+        assertEquals("https://example.com/sierra-nevada.jpg", savedBeverage.getImageUrl());
         assertNotNull(savedBeverage.getCreatedAt());
     }
 
@@ -515,12 +515,12 @@ class BeverageRepositoryTest {
         UUID beverageId = savedBeverage.getId();
 
         // Act
-        savedBeverage.setImg_url("https://example.com/updated-image.jpg");
+        savedBeverage.setImageUrl("https://example.com/updated-image.jpg");
         beverageRepository.save(savedBeverage);
         Beverage updatedBeverage = beverageRepository.findById(beverageId).orElseThrow();
 
         // Assert
-        assertEquals("https://example.com/updated-image.jpg", updatedBeverage.getImg_url());
+        assertEquals("https://example.com/updated-image.jpg", updatedBeverage.getImageUrl());
     }
 
     @Test
@@ -534,7 +534,7 @@ class BeverageRepositoryTest {
         savedBeverage.setType("Multi Type");
         savedBeverage.setAbv(10);
         savedBeverage.setDescription("This beverage has been updated in multiple ways");
-        savedBeverage.setImg_url("https://example.com/multi-update.jpg");
+        savedBeverage.setImageUrl("https://example.com/multi-update.jpg");
         beverageRepository.save(savedBeverage);
         Beverage updatedBeverage = beverageRepository.findById(beverageId).orElseThrow();
 
@@ -543,7 +543,7 @@ class BeverageRepositoryTest {
         assertEquals("Multi Type", updatedBeverage.getType());
         assertEquals(10, updatedBeverage.getAbv());
         assertEquals("This beverage has been updated in multiple ways", updatedBeverage.getDescription());
-        assertEquals("https://example.com/multi-update.jpg", updatedBeverage.getImg_url());
+        assertEquals("https://example.com/multi-update.jpg", updatedBeverage.getImageUrl());
     }
 
     // UPDATE - Unhappy Paths
@@ -682,7 +682,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url(null);
+        savedBeverage.setImageUrl(null);
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -692,7 +692,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url("   ");
+        savedBeverage.setImageUrl("   ");
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -702,7 +702,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage = beverageRepository.save(validBeverage);
 
         // Act & Assert
-        savedBeverage.setImg_url("a.jpg");
+        savedBeverage.setImageUrl("a.jpg");
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage));
     }
 
@@ -715,7 +715,7 @@ class BeverageRepositoryTest {
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
         // Act & Assert
-        savedBeverage2.setImg_url("https://example.com/guinness.jpg");
+        savedBeverage2.setImageUrl("https://example.com/guinness.jpg");
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(savedBeverage2));
     }
 

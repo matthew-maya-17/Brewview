@@ -22,7 +22,7 @@ public class BeverageDTO {
 
     @NotNull(message = "ABV cannot be null")
     @Min(value = 0, message = "ABV must be 0 or greater")
-    private Integer abv;
+    private int abv;
 
     @NotBlank(message = "Description cannot be blank")
     @Size(min = 25, max = 254, message = "The Beverage Description must be between 25 and 254 characters")
@@ -30,20 +30,20 @@ public class BeverageDTO {
 
     @NotBlank(message = "Image URL cannot be blank")
     @Size(min = 6, max = 500, message = "The Beverage url must be a valid link and between 6 and 500 characters")
-    private String imgUrl;
+    private String imageUrl;
 
     private LocalDateTime createdAt;
 
     public BeverageDTO() {
     }
 
-    public BeverageDTO(UUID id, String beverageName, String type, Integer abv, String description, String imgUrl, LocalDateTime createdAt) {
+    public BeverageDTO(UUID id, String beverageName, String type, Integer abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
         this.abv = abv;
         this.description = description;
-        this.imgUrl = imgUrl;
+        this.imageUrl = imageUrl;
         this.createdAt = createdAt;
     }
 
@@ -87,12 +87,12 @@ public class BeverageDTO {
         this.description = description;
     }
 
-    public String getImgUrl() {
-        return imgUrl;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public LocalDateTime getCreatedAt() {

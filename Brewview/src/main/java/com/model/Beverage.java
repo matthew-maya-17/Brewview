@@ -16,7 +16,7 @@ public class Beverage {
     @Column(name = "beverage_id")
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "beverage_name")
     @NotBlank
     @Size(message = "The Beverage name must be between 6 and 254 characters!", min = 6, max = 254)
     private String beverageName;
@@ -35,10 +35,10 @@ public class Beverage {
     @Size(message = "The Beverage Description must be between 25 and 254 characters", min = 25, max = 254)
     private String description;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "image_url")
     @NotBlank
     @Size(message = "The Beverage url must be a valid link and between 6 and 500 characters", min = 6, max = 500)
-    private String img_url;
+    private String imageUrl;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -46,13 +46,13 @@ public class Beverage {
     public Beverage() {
     }
 
-    public Beverage(UUID id, String beverageName, String type, int abv, String description, String img_url, LocalDateTime createdAt) {
+    public Beverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
         this.abv = abv;
         this.description = description;
-        this.img_url = img_url;
+        this.imageUrl = imageUrl;
         this.createdAt = createdAt;
     }
 
@@ -96,12 +96,12 @@ public class Beverage {
         this.description = description;
     }
 
-    public String getImg_url() {
-        return img_url;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImg_url(String img_url) {
-        this.img_url = img_url;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public LocalDateTime getCreatedAt() {

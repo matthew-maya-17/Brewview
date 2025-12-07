@@ -161,7 +161,7 @@ public class BeverageService {
         existingBeverage.setType(updatedBeverageDTO.getType());
         existingBeverage.setAbv(updatedBeverageDTO.getAbv());
         existingBeverage.setDescription(updatedBeverageDTO.getDescription());
-        existingBeverage.setImg_url(updatedBeverageDTO.getImgUrl());
+        existingBeverage.setImageUrl(updatedBeverageDTO.getImageUrl());
 
         Beverage savedBeverage = beverageRepository.save(existingBeverage);
         return toDTO(savedBeverage);
@@ -242,7 +242,7 @@ public class BeverageService {
         Beverage beverage = beverageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
 
-        beverage.setImg_url(newImageUrl);
+        beverage.setImageUrl(newImageUrl);
         Beverage savedBeverage = beverageRepository.save(beverage);
         return toDTO(savedBeverage);
     }
@@ -282,7 +282,7 @@ public class BeverageService {
                 beverage.getType(),
                 beverage.getAbv(),
                 beverage.getDescription(),
-                beverage.getImg_url(),
+                beverage.getImageUrl(),
                 beverage.getCreatedAt()
         );
     }
@@ -298,7 +298,7 @@ public class BeverageService {
                 dto.getType(),
                 dto.getAbv(),
                 dto.getDescription(),
-                dto.getImgUrl(),
+                dto.getImageUrl(),
                 dto.getCreatedAt()
         );
     }
