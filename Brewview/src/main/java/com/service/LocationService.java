@@ -1,5 +1,10 @@
 package com.service;
 
+import com.dto.LocationCreateDTO;
+import com.dto.LocationDTO;
+import com.dto.LocationUpdateDTO;
+import com.exception.ResourceConflictException;
+import com.exception.ResourceNotFoundException;
 import com.model.Location;
 import com.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 @Service
 @Transactional
 public class LocationService {
@@ -21,57 +25,65 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
-    public Location createLocation(Location location) {
-        if (locationRepository.existsByLocationName(location.getLocationName())) {
-            throw new IllegalArgumentException("Location with name '" + location.getLocationName() + "' already exists");
+    public LocationDTO createLocation(LocationCreateDTO createDTO) {
+        if (locationRepository.existsByLocationName(createDTO.getLocationName())) {
+            throw new ResourceConflictException("Location with name '" + createDTO.getLocationName() + "' already exists");
         }
-        return locationRepository.save(location);
+        Location location = toEntity(createDTO);
+        Location savedLocation = locationRepository.save(location);
+        return toDTO(savedLocation);
     }
 
-    public Optional<Location> getLocationById(UUID id) {
-        return locationRepository.findById(id);
+    public LocationDTO getLocationById(UUID id) {
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Location with id '" + id + "' not found"));
+        return toDTO(location);
     }
 
-    public Optional<Location> getLocationByName(String locationName) {
-        return locationRepository.findByLocationName(locationName);
+    public LocationDTO getLocationByName(String locationName) {
+        Location location = locationRepository.findByLocationName(locationName)
+                .orElseThrow(() -> new ResourceNotFoundException("Location with name '" + locationName + "' not found"));
+        return toDTO(location);
     }
 
-    public List<Location> getAllLocations() {
-        return locationRepository.findAll();
+    public List<LocationDTO> getAllLocations() {
+        List<Location> locations = locationRepository.findAll();
+        return toDTOList(locations);
     }
 
-    public List<Location> getLocationsByCity(String city) {
-        return locationRepository.findByCity(city);
+    public List<LocationDTO> getLocationsByCity(String city) {
+        List<Location> locations = locationRepository.findByCity(city);
+        return toDTOList(locations);
     }
 
-    public List<Location> getLocationsByCountry(String country) {
-        return locationRepository.findByCountry(country);
+    public List<LocationDTO> getLocationsByCountry(String country) {
+        List<Location> locations = locationRepository.findByCountry(country);
+        return toDTOList(locations);
     }
 
-    public List<Location> getLocationsByCityAndCountry(String city, String country) {
-        return locationRepository.findByCityAndCountry(city, country);
+    public List<LocationDTO> getLocationsByCityAndCountry(String city, String country) {
+        List<Location> locations = locationRepository.findByCityAndCountry(city, country);
+        return toDTOList(locations);
     }
 
-    public Location updateLocation(UUID id, Location updatedLocation) {
-        return locationRepository.findById(id)
-                .map(location -> {
-                    if (!location.getLocationName().equals(updatedLocation.getLocationName())
-                            && locationRepository.existsByLocationName(updatedLocation.getLocationName())) {
-                        throw new IllegalArgumentException("Location with name '" + updatedLocation.getLocationName() + "' already exists");
-                    }
+    public LocationDTO updateLocation(UUID id, LocationUpdateDTO updateDTO) {
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Location with id '" + id + "' not found"));
 
-                    location.setLocationName(updatedLocation.getLocationName());
-                    location.setAddress(updatedLocation.getAddress());
-                    location.setCity(updatedLocation.getCity());
-                    location.setCountry(updatedLocation.getCountry());
-                    return locationRepository.save(location);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Location with id '" + id + "' not found"));
+        // Check if the new name conflicts with another location
+        if (!location.getLocationName().equals(updateDTO.getLocationName())
+                && locationRepository.existsByLocationName(updateDTO.getLocationName())) {
+            throw new ResourceConflictException("Location with name '" + updateDTO.getLocationName() + "' already exists");
+        }
+
+        updateEntityFromDTO(location, updateDTO);
+        Location updatedLocation = locationRepository.save(location);
+        return toDTO(updatedLocation);
     }
 
     public void deleteLocation(UUID id) {
         if (!locationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Location with id '" + id + "' not found");
+            throw new ResourceNotFoundException("Location with id '" + id + "' not found");
         }
         locationRepository.deleteById(id);
     }
@@ -82,5 +94,49 @@ public class LocationService {
 
     public boolean locationExistsByName(String locationName) {
         return locationRepository.existsByLocationName(locationName);
+    }
+
+    private LocationDTO toDTO(Location location) {
+        if (location == null) {
+            return null;
+        }
+        return new LocationDTO(
+                location.getId(),
+                location.getLocationName(),
+                location.getAddress(),
+                location.getCity(),
+                location.getCountry()
+        );
+    }
+
+    private Location toEntity(LocationCreateDTO createDTO) {
+        if (createDTO == null) {
+            return null;
+        }
+        return new Location(
+                createDTO.getLocationName(),
+                createDTO.getAddress(),
+                createDTO.getCity(),
+                createDTO.getCountry()
+        );
+    }
+
+    private List<LocationDTO> toDTOList(List<Location> locations) {
+        if (locations == null) {
+            return null;
+        }
+        return locations.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private void updateEntityFromDTO(Location location, LocationUpdateDTO updateDTO) {
+        if (location == null || updateDTO == null) {
+            return;
+        }
+        location.setLocationName(updateDTO.getLocationName());
+        location.setAddress(updateDTO.getAddress());
+        location.setCity(updateDTO.getCity());
+        location.setCountry(updateDTO.getCountry());
     }
 }
