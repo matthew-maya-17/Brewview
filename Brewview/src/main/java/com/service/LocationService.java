@@ -7,7 +7,6 @@ import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Location;
 import com.repository.LocationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,7 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
 
-    @Autowired
+
     public LocationService(LocationRepository locationRepository) {
         this.locationRepository = locationRepository;
     }
