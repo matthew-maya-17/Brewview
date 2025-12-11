@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
-public class LocationDTO {
+public class ResponseLocation {
     private UUID id;
 
     @NotBlank(message = "Location name cannot be blank")
@@ -24,9 +24,9 @@ public class LocationDTO {
     @Size(message = "Country must be between 1 and 100 characters!", min = 1, max = 100)
     private String country;
 
-    public LocationDTO() {}
+    public ResponseLocation() {}
 
-    public LocationDTO(UUID id, String locationName, String address, String city, String country) {
+    public ResponseLocation(UUID id, String locationName, String address, String city, String country) {
         this.id = id;
         this.locationName = locationName;
         this.address = address;

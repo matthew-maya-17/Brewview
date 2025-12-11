@@ -1,8 +1,8 @@
 package com.service;
 
 import com.dto.LocationCreateDTO;
-import com.dto.LocationDTO;
 import com.dto.LocationUpdateDTO;
+import com.dto.ResponseLocation;
 import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Location;
@@ -24,7 +24,7 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
-    public LocationDTO createLocation(LocationCreateDTO createDTO) {
+    public ResponseLocation createLocation(LocationCreateDTO createDTO) {
         if (locationRepository.existsByLocationName(createDTO.getLocationName())) {
             throw new ResourceConflictException("Location with name '" + createDTO.getLocationName() + "' already exists");
         }
@@ -33,39 +33,39 @@ public class LocationService {
         return toDTO(savedLocation);
     }
 
-    public LocationDTO getLocationById(UUID id) {
+    public ResponseLocation getLocationById(UUID id) {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location with id '" + id + "' not found"));
         return toDTO(location);
     }
 
-    public LocationDTO getLocationByName(String locationName) {
+    public ResponseLocation getLocationByName(String locationName) {
         Location location = locationRepository.findByLocationName(locationName)
                 .orElseThrow(() -> new ResourceNotFoundException("Location with name '" + locationName + "' not found"));
         return toDTO(location);
     }
 
-    public List<LocationDTO> getAllLocations() {
+    public List<ResponseLocation> getAllLocations() {
         List<Location> locations = locationRepository.findAll();
         return toDTOList(locations);
     }
 
-    public List<LocationDTO> getLocationsByCity(String city) {
+    public List<ResponseLocation> getLocationsByCity(String city) {
         List<Location> locations = locationRepository.findByCity(city);
         return toDTOList(locations);
     }
 
-    public List<LocationDTO> getLocationsByCountry(String country) {
+    public List<ResponseLocation> getLocationsByCountry(String country) {
         List<Location> locations = locationRepository.findByCountry(country);
         return toDTOList(locations);
     }
 
-    public List<LocationDTO> getLocationsByCityAndCountry(String city, String country) {
+    public List<ResponseLocation> getLocationsByCityAndCountry(String city, String country) {
         List<Location> locations = locationRepository.findByCityAndCountry(city, country);
         return toDTOList(locations);
     }
 
-    public LocationDTO updateLocation(UUID id, LocationUpdateDTO updateDTO) {
+    public ResponseLocation updateLocation(UUID id, LocationUpdateDTO updateDTO) {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location with id '" + id + "' not found"));
 
@@ -95,11 +95,11 @@ public class LocationService {
         return locationRepository.existsByLocationName(locationName);
     }
 
-    private LocationDTO toDTO(Location location) {
+    private ResponseLocation toDTO(Location location) {
         if (location == null) {
             return null;
         }
-        return new LocationDTO(
+        return new ResponseLocation(
                 location.getId(),
                 location.getLocationName(),
                 location.getAddress(),
@@ -120,7 +120,7 @@ public class LocationService {
         );
     }
 
-    private List<LocationDTO> toDTOList(List<Location> locations) {
+    private List<ResponseLocation> toDTOList(List<Location> locations) {
         if (locations == null) {
             return null;
         }
