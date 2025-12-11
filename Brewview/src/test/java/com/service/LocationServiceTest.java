@@ -1,7 +1,7 @@
 package com.service;
 
 import com.dto.LocationCreateDTO;
-import com.dto.LocationDTO;
+import com.dto.ResponseLocation;
 import com.dto.LocationUpdateDTO;
 import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
@@ -78,7 +78,7 @@ public class LocationServiceTest {
         when(locationRepository.existsByLocationName(createDTO.getLocationName())).thenReturn(false);
         when(locationRepository.save(any(Location.class))).thenReturn(testLocation);
 
-        LocationDTO result = locationService.createLocation(createDTO);
+        ResponseLocation result = locationService.createLocation(createDTO);
 
         assertNotNull(result);
         assertEquals(createDTO.getLocationName(), result.getLocationName());
@@ -105,7 +105,7 @@ public class LocationServiceTest {
     void getLocationById_Success() {
         when(locationRepository.findById(testLocationId)).thenReturn(Optional.of(testLocation));
 
-        LocationDTO result = locationService.getLocationById(testLocationId);
+        ResponseLocation result = locationService.getLocationById(testLocationId);
 
         assertNotNull(result);
         assertEquals(testLocation.getLocationName(), result.getLocationName());
@@ -130,7 +130,7 @@ public class LocationServiceTest {
     void getLocationByName_Success() {
         when(locationRepository.findByLocationName("Headquarters")).thenReturn(Optional.of(testLocation));
 
-        LocationDTO result = locationService.getLocationByName("Headquarters");
+        ResponseLocation result = locationService.getLocationByName("Headquarters");
 
         assertNotNull(result);
         assertEquals("Headquarters", result.getLocationName());
@@ -155,7 +155,7 @@ public class LocationServiceTest {
         List<Location> locations = Arrays.asList(testLocation, testLocation2);
         when(locationRepository.findAll()).thenReturn(locations);
 
-        List<LocationDTO> result = locationService.getAllLocations();
+        List<ResponseLocation> result = locationService.getAllLocations();
 
         assertEquals(2, result.size());
         assertEquals(testLocation.getLocationName(), result.get(0).getLocationName());
@@ -168,7 +168,7 @@ public class LocationServiceTest {
         List<Location> locations = Arrays.asList(testLocation);
         when(locationRepository.findByCity("New York")).thenReturn(locations);
 
-        List<LocationDTO> result = locationService.getLocationsByCity("New York");
+        List<ResponseLocation> result = locationService.getLocationsByCity("New York");
 
         assertEquals(1, result.size());
         assertEquals("New York", result.get(0).getCity());
@@ -180,7 +180,7 @@ public class LocationServiceTest {
         List<Location> locations = Arrays.asList(testLocation, testLocation2);
         when(locationRepository.findByCountry("USA")).thenReturn(locations);
 
-        List<LocationDTO> result = locationService.getLocationsByCountry("USA");
+        List<ResponseLocation> result = locationService.getLocationsByCountry("USA");
 
         assertEquals(2, result.size());
         verify(locationRepository).findByCountry("USA");
@@ -191,7 +191,7 @@ public class LocationServiceTest {
         List<Location> locations = Arrays.asList(testLocation);
         when(locationRepository.findByCityAndCountry("New York", "USA")).thenReturn(locations);
 
-        List<LocationDTO> result = locationService.getLocationsByCityAndCountry("New York", "USA");
+        List<ResponseLocation> result = locationService.getLocationsByCityAndCountry("New York", "USA");
 
         assertEquals(1, result.size());
         assertEquals("New York", result.get(0).getCity());
@@ -205,7 +205,7 @@ public class LocationServiceTest {
         when(locationRepository.existsByLocationName(updateDTO.getLocationName())).thenReturn(false);
         when(locationRepository.save(any(Location.class))).thenReturn(testLocation);
 
-        LocationDTO result = locationService.updateLocation(testLocationId, updateDTO);
+        ResponseLocation result = locationService.updateLocation(testLocationId, updateDTO);
 
         assertNotNull(result);
         verify(locationRepository).findById(testLocationId);

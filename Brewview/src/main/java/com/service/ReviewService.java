@@ -55,7 +55,7 @@ public class ReviewService {
     }
 
     public List<ResponseReview> findAllReviewsByBeverage(Beverage beverage){
-        return reviewRepository.findReviewsByUser(beverage)
+        return reviewRepository.findReviewsByBeverage(beverage)
                 .stream()
                 .map(this::convertToResponseDto)
                 .toList();
