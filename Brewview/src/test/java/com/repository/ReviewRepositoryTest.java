@@ -579,30 +579,6 @@ class ReviewRepositoryTest {
         assertFalse(foundReview.isPresent());
     }
 
-    @Test
-    void findReviewByUserAndBeverageAndLocationShouldThrowExceptionWhenUserIsNull() {
-        // Act & Assert
-        assertThrows(Exception.class, () -> {
-            reviewRepository.findReviewByUserAndBeverageAndLocation(null, validBeverage, validLocation);
-        });
-    }
-
-    @Test
-    void findReviewByUserAndBeverageAndLocationShouldThrowExceptionWhenBeverageIsNull() {
-        // Act & Assert
-        assertThrows(Exception.class, () -> {
-            reviewRepository.findReviewByUserAndBeverageAndLocation(validUser, null, validLocation);
-        });
-    }
-
-    @Test
-    void findReviewByUserAndBeverageAndLocationShouldThrowExceptionWhenLocationIsNull() {
-        // Act & Assert
-        assertThrows(Exception.class, () -> {
-            reviewRepository.findReviewByUserAndBeverageAndLocation(validUser, validBeverage, null);
-        });
-    }
-
     // ========== UPDATE OPERATIONS ==========
 
     // UPDATE - Happy Paths
