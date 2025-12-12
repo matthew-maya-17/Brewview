@@ -1,6 +1,7 @@
 package com.service;
 
 import com.dto.*;
+import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Beverage;
 import com.model.Location;
@@ -14,18 +15,19 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ReviewService {
 
-    private ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private BeverageRepository beverageRepository;
+    private final BeverageRepository beverageRepository;
 
-    private LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
 
     public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository, BeverageRepository beverageRepository, LocationRepository locationRepository) {
         this.reviewRepository = reviewRepository;
@@ -36,7 +38,28 @@ public class ReviewService {
 
     //CREATE
     public ResponseReview addReview(ReviewRequestDTO reviewRequestDTO){
-        return null;
+        User user = userRepository.findById(reviewRequestDTO.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + reviewRequestDTO.getUserId() + " does not exist."));
+
+        Beverage beverage = beverageRepository.findById(reviewRequestDTO.getBeverageId())
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage with ID: " + reviewRequestDTO.getBeverageId() + " does not exist."));
+
+        Location location = locationRepository.findById(reviewRequestDTO.getLocationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Location with ID: " + reviewRequestDTO.getLocationId() + " does not exist."));
+
+        if(reviewRepository.findReviewByUserAndBeverageAndLocation(user, beverage, location).isPresent()){
+            throw new ResourceConflictException("Review already exists");
+        }
+
+        Review newReview = new Review();
+        newReview.setUser(user);
+        newReview.setBeverage(beverage);
+        newReview.setLocation(location);
+        newReview.setRating(reviewRequestDTO.getRating());
+        newReview.setReviewNote(reviewRequestDTO.getReviewNote());
+
+        Review savedReview = reviewRepository.save(newReview);
+        return convertToResponseDto(savedReview);
     }
 
     //READ
@@ -75,41 +98,100 @@ public class ReviewService {
                 .toList();
     }
 
-    public ResponseReview findReviewById(UUID id){
-        Review review =  reviewRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Review with ID: " + id + " does not exist."));
+    public ResponseReview findReviewById(UUID reviewId){
+        // Find existing review
+        Review review =  reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID: " + reviewId + " does not exist."));
+
+
         return convertToResponseDto(review);
     }
 
     //UPDATE
+    public ResponseReview updateReviewById(UUID reviewId, ReviewRequestDTO updateRequest){
+        Review existingReview = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID: " + reviewId + " does not exist."));
+
+        // Determine final values: use existing if not provided in update request
+        User finalUser = existingReview.getUser();
+        Beverage finalBeverage = existingReview.getBeverage();
+        Location finalLocation = existingReview.getLocation();
+
+        // Update user if provided
+        if (updateRequest.getUserId() != null) {
+            User newUser = userRepository.findById(updateRequest.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + updateRequest.getUserId() + " does not exist."));
+
+            // Only update if different
+            if (!newUser.getId().equals(existingReview.getUser().getId())) {
+                finalUser = newUser;
+            }
+        }
+
+        // Update beverage if provided
+        if (updateRequest.getBeverageId() != null) {
+            Beverage newBeverage = beverageRepository.findById(updateRequest.getBeverageId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Beverage with ID: " + updateRequest.getBeverageId() + " does not exist."));
+
+            // Only update if different
+            if (!newBeverage.getId().equals(existingReview.getBeverage().getId())) {
+                finalBeverage = newBeverage;
+            }
+        }
+
+        // Update location if provided
+        if (updateRequest.getLocationId() != null) {
+            Location newLocation = locationRepository.findById(updateRequest.getLocationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Location with ID: " + updateRequest.getLocationId() + " does not exist."));
+
+            // Only update if different
+            if (!newLocation.getId().equals(existingReview.getLocation().getId())) {
+                finalLocation = newLocation;
+            }
+        }
+
+        // Check if the final combination would create a duplicate (excluding current review)
+        // Only check if any of the relationships changed
+        boolean combinationChanged = !finalUser.getId().equals(existingReview.getUser().getId()) ||
+                !finalBeverage.getId().equals(existingReview.getBeverage().getId()) ||
+                !finalLocation.getId().equals(existingReview.getLocation().getId());
+
+        if (combinationChanged) {
+            Optional<Review> duplicateReview = reviewRepository
+                    .findReviewByUserAndBeverageAndLocation(finalUser, finalBeverage, finalLocation);
+
+            // Check if duplicate exists and it's not the current review
+            if (duplicateReview.isPresent() && !duplicateReview.get().getReviewId().equals(reviewId)) {
+                throw new ResourceConflictException("A review already exists for this combination of User, Beverage, and Location");
+            }
+        }
+
+        // Update the review entity with final values
+        existingReview.setUser(finalUser);
+        existingReview.setBeverage(finalBeverage);
+        existingReview.setLocation(finalLocation);
+
+        // Update rating if provided
+        if (updateRequest.getRating() != null) {
+            existingReview.setRating(updateRequest.getRating());
+        }
+
+        // Update review notes if provided
+        if (updateRequest.getReviewNote() != null) {
+            existingReview.setReviewNote(updateRequest.getReviewNote());
+        }
+
+        Review updatedReview = reviewRepository.save(existingReview);
+        return convertToResponseDto(updatedReview);
+    }
+
 
     //DELETE
     public void deleteReviewById(UUID reviewId){
         if(!reviewRepository.existsById(reviewId)){
             throw new ResourceNotFoundException("User with ID: " + reviewId + " does not exist.");
         }
-        userRepository.deleteById(reviewId);
-    }
-
-    // Helper Methods for Conversion
-    private Review convertToEntity(ReviewRequestDTO dto){
-        Review review = new Review();
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getUserId()));
-
-        Beverage beverage = beverageRepository.findById(dto.getBeverageId())
-                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + dto.getBeverageId()));
-
-        Location location = locationRepository.findById(dto.getLocationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Location not found with id: " + dto.getLocationId()));
-
-        review.setUser(user);
-        review.setBeverage(beverage);
-        review.setLocation(location);
-        review.setRating(dto.getRating());
-        review.setReviewNote(dto.getReviewNote());
-
-        return review;
+        reviewRepository.deleteById(reviewId);
     }
 
     private ResponseReview convertToResponseDto(Review review){

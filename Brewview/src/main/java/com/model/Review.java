@@ -1,5 +1,6 @@
 package com.model;
 
+import com.validation.ValidHalfIncrement;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -43,6 +44,7 @@ public class Review {
     @NotNull(message = "Rating cannot be null")
     @DecimalMin(value = "0.0", message = "Rating must be between 0 and 5")
     @DecimalMax(value = "5.0", message = "Rating must be between 0 and 5")
+    @ValidHalfIncrement
     private BigDecimal rating;
 
     @Column(name = "notes", columnDefinition = "TEXT")

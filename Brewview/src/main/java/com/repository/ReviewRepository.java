@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -18,5 +19,6 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     List<Review> findReviewsByBeverage(Beverage beverage);
     List<Review> findReviewsByLocation(Location location);
     List<Review> findReviewsByRatingBetween(BigDecimal minRating, BigDecimal maxRating);
+    Optional<Review> findReviewByUserAndBeverageAndLocation(User user, Beverage beverage, Location location);
 
 }

@@ -1,5 +1,6 @@
 package com.dto;
 
+import com.validation.ValidHalfIncrement;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -26,6 +27,7 @@ public class ReviewRequestDTO {
     @NotNull(message = "Rating cannot be null")
     @DecimalMin(value = "0.0", message = "Rating must be between 0 and 5")
     @DecimalMax(value = "5.0", message = "Rating must be between 0 and 5")
+    @ValidHalfIncrement
     private BigDecimal rating;
 
     @Schema(description = "Review Notes", example = "Beverage AB was super creamy with hints of cacao, making it super delicious. Overall the taste was great")
