@@ -373,6 +373,47 @@ class ReviewRepositoryTest {
         }));
     }
 
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnReviewWhenExists() {
+        // Arrange
+        Review savedReview = reviewRepository.save(validReview);
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertTrue(foundReview.isPresent());
+        assertEquals(savedReview.getReviewId(), foundReview.get().getReviewId());
+        assertEquals(validUser.getId(), foundReview.get().getUser().getId());
+        assertEquals(validBeverage.getId(), foundReview.get().getBeverage().getId());
+        assertEquals(validLocation.getId(), foundReview.get().getLocation().getId());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnCorrectReviewWhenMultipleExist() {
+        // Arrange
+        User user2 = userRepository.save(new User("TestUser2", "user2@example.com", "hash", Role.ROLE_USER, LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Location location2 = locationRepository.save(new Location("Another Place", "456 Other St", "Other City", "Canada"));
+
+        Review review1 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("4.0"), "Review 1", LocalDateTime.now()));
+        Review review2 = reviewRepository.save(new Review(user2, validBeverage, validLocation, new BigDecimal("5.0"), "Review 2", LocalDateTime.now()));
+        Review review3 = reviewRepository.save(new Review(validUser, beverage2, validLocation, new BigDecimal("3.0"), "Review 3", LocalDateTime.now()));
+        Review review4 = reviewRepository.save(new Review(validUser, validBeverage, location2, new BigDecimal("4.5"), "Review 4", LocalDateTime.now()));
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertTrue(foundReview.isPresent());
+        assertEquals(review1.getReviewId(), foundReview.get().getReviewId());
+        assertEquals(validUser.getId(), foundReview.get().getUser().getId());
+        assertEquals(validBeverage.getId(), foundReview.get().getBeverage().getId());
+        assertEquals(validLocation.getId(), foundReview.get().getLocation().getId());
+    }
+
     // READ - Unhappy Paths
     @Test
     void findByIdShouldReturnEmptyWhenReviewDoesNotExist() {
@@ -462,6 +503,80 @@ class ReviewRepositoryTest {
 
         // Assert
         assertTrue(reviews.isEmpty());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenNoReviewExists() {
+        // Arrange - No reviews saved
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertFalse(foundReview.isPresent());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenUserDoesNotMatch() {
+        // Arrange
+        User user2 = userRepository.save(new User("TestUser2", "user2@example.com", "hash", Role.ROLE_USER, LocalDateTime.now()));
+        reviewRepository.save(new Review(user2, validBeverage, validLocation, new BigDecimal("4.0"), "Review", LocalDateTime.now()));
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertFalse(foundReview.isPresent());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenBeverageDoesNotMatch() {
+        // Arrange
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        reviewRepository.save(new Review(validUser, beverage2, validLocation, new BigDecimal("4.0"), "Review", LocalDateTime.now()));
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertFalse(foundReview.isPresent());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenLocationDoesNotMatch() {
+        // Arrange
+        Location location2 = locationRepository.save(new Location("Another Place", "456 Other St", "Other City", "Canada"));
+        reviewRepository.save(new Review(validUser, validBeverage, location2, new BigDecimal("4.0"), "Review", LocalDateTime.now()));
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertFalse(foundReview.isPresent());
+    }
+
+    @Test
+    void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenPartialMatchExists() {
+        // Arrange
+        User user2 = userRepository.save(new User("TestUser2", "user2@example.com", "hash", Role.ROLE_USER, LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Location location2 = locationRepository.save(new Location("Another Place", "456 Other St", "Other City", "Canada"));
+
+        // Create reviews with partial matches but not exact combination
+        reviewRepository.save(new Review(validUser, beverage2, validLocation, new BigDecimal("4.0"), "Review 1", LocalDateTime.now())); // User matches, beverage doesn't
+        reviewRepository.save(new Review(user2, validBeverage, validLocation, new BigDecimal("5.0"), "Review 2", LocalDateTime.now())); // Beverage matches, user doesn't
+        reviewRepository.save(new Review(validUser, validBeverage, location2, new BigDecimal("3.0"), "Review 3", LocalDateTime.now())); // User and beverage match, location doesn't
+
+        // Act
+        Optional<Review> foundReview = reviewRepository.findReviewByUserAndBeverageAndLocation(
+                validUser, validBeverage, validLocation);
+
+        // Assert
+        assertFalse(foundReview.isPresent());
     }
 
     // ========== UPDATE OPERATIONS ==========
