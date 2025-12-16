@@ -70,22 +70,22 @@ public class ReviewService {
                 .toList();
     }
 
-    public List<ResponseReview> findAllReviewsByUser(User user){
-        return reviewRepository.findReviewsByUser(user)
+    public List<ResponseReview> findAllReviewsByUserId(UUID userId){
+        return reviewRepository.findReviewsByUserId(userId)
                 .stream()
                 .map(this::convertToResponseDto)
                 .toList();
     }
 
-    public List<ResponseReview> findAllReviewsByBeverage(Beverage beverage){
-        return reviewRepository.findReviewsByBeverage(beverage)
+    public List<ResponseReview> findAllReviewsByBeverageId(UUID beverageId){
+        return reviewRepository.findReviewsByBeverageId(beverageId)
                 .stream()
                 .map(this::convertToResponseDto)
                 .toList();
     }
 
-    public List<ResponseReview> findAllReviewsByLocation(Location location){
-        return reviewRepository.findReviewsByLocation(location)
+    public List<ResponseReview> findAllReviewsByLocationId(UUID locationId){
+        return reviewRepository.findReviewsByLocationId(locationId)
                 .stream()
                 .map(this::convertToResponseDto)
                 .toList();
@@ -102,8 +102,7 @@ public class ReviewService {
         // Find existing review
         Review review =  reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review with ID: " + reviewId + " does not exist."));
-
-
+        
         return convertToResponseDto(review);
     }
 
