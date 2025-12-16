@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RequestMapping(path = "/api/beverages")
 @Tag(
         name = "Beverage Management",
-        description = "Endpoints for creating, retrieving, updating, and deleting beverages"
+        description = "Endpoints for creating, retrieving, updating, and deleting beverages."
 )
 
 public class BeverageController {
@@ -104,7 +105,7 @@ public class BeverageController {
     public ResponseEntity<ResponseBeverage> getBeverageById(
             @Parameter(
                     name = "id",
-                    description = "UUID of the beverage to retrieve",
+                    description = "UUID of the beverage to retrieve.",
                     required = true,
                     example = "550e8400-e29b-41d4-a716-446655440000"
             )
@@ -140,7 +141,7 @@ public class BeverageController {
     public ResponseEntity<ResponseBeverage> getBeverageByName(
             @Parameter(
                     name = "name",
-                    description = "Name of the beverage to retrieve",
+                    description = "Name of the beverage to retrieve.",
                     required = true,
                     example = "Sierra Nevada Pale Ale"
             )
@@ -173,7 +174,7 @@ public class BeverageController {
     public ResponseEntity<List<ResponseBeverage>> getBeveragesByType(
             @Parameter(
                     name = "type",
-                    description = "Type of beverages to retrieve",
+                    description = "Type of beverages to retrieve.",
                     required = true,
                     example = "IPA"
             )
@@ -207,16 +208,16 @@ public class BeverageController {
                     name = "min",
                     description = "Minimum ABV value",
                     required = true,
-                    example = "4"
+                    example = "4.5"
             )
-            @RequestParam int min,
+            @RequestParam BigDecimal min,
             @Parameter(
                     name = "max",
                     description = "Maximum ABV value",
                     required = true,
-                    example = "8"
+                    example = "8.3"
             )
-            @RequestParam int max
+            @RequestParam BigDecimal max
     ) {
         List<ResponseBeverage> beverages = beverageService.getBeveragesByAbvRange(min, max);
         return ResponseEntity.ok(beverages);
@@ -244,7 +245,7 @@ public class BeverageController {
     public ResponseEntity<List<ResponseBeverage>> getBeveragesByTypeAndAbvRange(
             @Parameter(
                     name = "type",
-                    description = "Type of beverages to retrieve",
+                    description = "Type of beverages to retrieve.",
                     required = true,
                     example = "IPA"
             )
@@ -253,16 +254,16 @@ public class BeverageController {
                     name = "min",
                     description = "Minimum ABV value",
                     required = true,
-                    example = "5"
+                    example = "5.9"
             )
-            @RequestParam int min,
+            @RequestParam BigDecimal min,
             @Parameter(
                     name = "max",
                     description = "Maximum ABV value",
                     required = true,
-                    example = "7"
+                    example = "7.1"
             )
-            @RequestParam int max
+            @RequestParam BigDecimal max
     ) {
         List<ResponseBeverage> beverages = beverageService.getBeveragesByTypeAndAbvRange(type, min, max);
         return ResponseEntity.ok(beverages);
@@ -518,9 +519,9 @@ public class BeverageController {
                     name = "abv",
                     description = "New ABV for the beverage",
                     required = true,
-                    example = "7"
+                    example = "7.8"
             )
-            @RequestParam int abv
+            @RequestParam BigDecimal abv
     ) {
         ResponseBeverage updatedBeverage = beverageService.updateBeverageAbv(id, abv);
         return ResponseEntity.ok(updatedBeverage);

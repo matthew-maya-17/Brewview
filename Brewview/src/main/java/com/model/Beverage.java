@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class Beverage {
     @Column(name = "abv", nullable = false)
     @NotNull(message = "ABV cannot be null")
     @Min(value = 0, message = "ABV must be 0 or greater")
-    private int abv;
+    private BigDecimal abv;
 
     @Column(unique = true, nullable = false)
     @NotBlank
@@ -49,7 +50,7 @@ public class Beverage {
     public Beverage() {
     }
 
-    public Beverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
+    public Beverage(UUID id, String beverageName, String type, BigDecimal abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
@@ -83,11 +84,11 @@ public class Beverage {
         this.type = type;
     }
 
-    public int getAbv() {
+    public BigDecimal getAbv() {
         return abv;
     }
 
-    public void setAbv(int abv) {
+    public void setAbv(BigDecimal abv) {
         this.abv = abv;
     }
 

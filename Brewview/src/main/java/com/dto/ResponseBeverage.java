@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class ResponseBeverage {
 
     @NotNull(message = "ABV cannot be null")
     @Min(value = 0, message = "ABV must be 0 or greater")
-    private int abv;
+    private BigDecimal abv;
 
     @NotBlank(message = "Description cannot be blank")
     @Size(min = 25, max = 254, message = "The Beverage Description must be between 25 and 254 characters")
@@ -37,7 +38,7 @@ public class ResponseBeverage {
     public ResponseBeverage() {
     }
 
-    public ResponseBeverage(UUID id, String beverageName, String type, int abv, String description, String imageUrl, LocalDateTime createdAt) {
+    public ResponseBeverage(UUID id, String beverageName, String type, BigDecimal abv, String description, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
         this.beverageName = beverageName;
         this.type = type;
@@ -71,11 +72,11 @@ public class ResponseBeverage {
         this.type = type;
     }
 
-    public int getAbv() {
+    public BigDecimal getAbv() {
         return abv;
     }
 
-    public void setAbv(int abv) {
+    public void setAbv(BigDecimal abv) {
         this.abv = abv;
     }
 
