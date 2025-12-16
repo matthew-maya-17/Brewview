@@ -315,7 +315,7 @@ class ReviewRepositoryTest {
         Review review3 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("3.0"), "User1 review 2", LocalDateTime.now()));
 
         // Act
-        List<Review> userReviews = reviewRepository.findReviewsByUser(validUser);
+        List<Review> userReviews = reviewRepository.findReviewsByUserId(validUser.getId());
 
         // Assert
         assertEquals(2, userReviews.size());
@@ -331,7 +331,7 @@ class ReviewRepositoryTest {
         Review review3 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("3.0"), "Review 3", LocalDateTime.now()));
 
         // Act
-        List<Review> beverageReviews = reviewRepository.findReviewsByBeverage(validBeverage);
+        List<Review> beverageReviews = reviewRepository.findReviewsByBeverageId(validBeverage.getId());
 
         // Assert
         assertEquals(2, beverageReviews.size());
@@ -347,7 +347,7 @@ class ReviewRepositoryTest {
         Review review3 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("3.0"), "Review 3", LocalDateTime.now()));
 
         // Act
-        List<Review> locationReviews = reviewRepository.findReviewsByLocation(validLocation);
+        List<Review> locationReviews = reviewRepository.findReviewsByLocationId(validLocation.getId());
 
         // Assert
         assertEquals(2, locationReviews.size());
@@ -468,7 +468,7 @@ class ReviewRepositoryTest {
     @Test
     void findReviewsByUserShouldReturnEmptyListWhenNoReviewsExist() {
         // Act
-        List<Review> reviews = reviewRepository.findReviewsByUser(validUser);
+        List<Review> reviews = reviewRepository.findReviewsByUserId(validUser.getId());
 
         // Assert
         assertTrue(reviews.isEmpty());
@@ -477,7 +477,7 @@ class ReviewRepositoryTest {
     @Test
     void findReviewsByBeverageShouldReturnEmptyListWhenNoReviewsExist() {
         // Act
-        List<Review> reviews = reviewRepository.findReviewsByBeverage(validBeverage);
+        List<Review> reviews = reviewRepository.findReviewsByBeverageId(validBeverage.getId());
 
         // Assert
         assertTrue(reviews.isEmpty());
@@ -486,7 +486,7 @@ class ReviewRepositoryTest {
     @Test
     void findReviewsByLocationShouldReturnEmptyListWhenNoReviewsExist() {
         // Act
-        List<Review> reviews = reviewRepository.findReviewsByLocation(validLocation);
+        List<Review> reviews = reviewRepository.findReviewsByLocationId(validLocation.getId());
 
         // Assert
         assertTrue(reviews.isEmpty());

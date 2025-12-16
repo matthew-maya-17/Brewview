@@ -15,9 +15,9 @@ import java.util.UUID;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
-    List<Review> findReviewsByUser(User user);
-    List<Review> findReviewsByBeverage(Beverage beverage);
-    List<Review> findReviewsByLocation(Location location);
+    List<Review> findReviewsByUserId(UUID userId);
+    List<Review> findReviewsByBeverageId(UUID beverageId);
+    List<Review> findReviewsByLocationId(UUID locationId);
     List<Review> findReviewsByRatingBetween(BigDecimal minRating, BigDecimal maxRating);
     Optional<Review> findReviewByUserAndBeverageAndLocation(User user, Beverage beverage, Location location);
 
