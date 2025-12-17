@@ -56,7 +56,7 @@ class ReviewRepositoryTest {
                 null,
                 "Test Beer Review",
                 "IPA",
-                6,
+                new BigDecimal("6.0"),
                 "A great test beer for reviewing purposes here",
                 "https://example.com/test-beer.jpg",
                 LocalDateTime.now()
@@ -325,7 +325,7 @@ class ReviewRepositoryTest {
     @Test
     void findReviewsByBeverageShouldReturnReviewsForBeverage() {
         // Arrange
-        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", new BigDecimal("8.0"), "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
         Review review1 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("4.0"), "Review 1", LocalDateTime.now()));
         Review review2 = reviewRepository.save(new Review(validUser, beverage2, validLocation, new BigDecimal("5.0"), "Review 2", LocalDateTime.now()));
         Review review3 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("3.0"), "Review 3", LocalDateTime.now()));
@@ -394,7 +394,7 @@ class ReviewRepositoryTest {
     void findReviewByUserAndBeverageAndLocationShouldReturnCorrectReviewWhenMultipleExist() {
         // Arrange
         User user2 = userRepository.save(new User("TestUser2", "user2@example.com", "hash", Role.ROLE_USER, LocalDateTime.now()));
-        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", new BigDecimal("8.0"), "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
         Location location2 = locationRepository.save(new Location("Another Place", "456 Other St", "Other City", "Canada"));
 
         Review review1 = reviewRepository.save(new Review(validUser, validBeverage, validLocation, new BigDecimal("4.0"), "Review 1", LocalDateTime.now()));
@@ -534,7 +534,7 @@ class ReviewRepositoryTest {
     @Test
     void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenBeverageDoesNotMatch() {
         // Arrange
-        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", new BigDecimal("8.0"), "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
         reviewRepository.save(new Review(validUser, beverage2, validLocation, new BigDecimal("4.0"), "Review", LocalDateTime.now()));
 
         // Act
@@ -563,7 +563,7 @@ class ReviewRepositoryTest {
     void findReviewByUserAndBeverageAndLocationShouldReturnEmptyWhenPartialMatchExists() {
         // Arrange
         User user2 = userRepository.save(new User("TestUser2", "user2@example.com", "hash", Role.ROLE_USER, LocalDateTime.now()));
-        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", 8, "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Another Beer", "Stout", new BigDecimal("8.0"), "A different beer for testing reviews here", "https://example.com/another.jpg", LocalDateTime.now()));
         Location location2 = locationRepository.save(new Location("Another Place", "456 Other St", "Other City", "Canada"));
 
         // Create reviews with partial matches but not exact combination

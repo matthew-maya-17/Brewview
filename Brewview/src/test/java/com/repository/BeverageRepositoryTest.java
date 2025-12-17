@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,7 @@ class BeverageRepositoryTest {
                 null,
                 "Sierra Nevada Pale Ale",
                 "Pale Ale",
-                5,
+                new BigDecimal("5.6"),
                 "A classic American pale ale with citrus and pine hop flavors",
                 "https://example.com/sierra-nevada.jpg",
                 LocalDateTime.now()
@@ -49,7 +50,7 @@ class BeverageRepositoryTest {
         assertNotNull(savedBeverage.getId());
         assertEquals("Sierra Nevada Pale Ale", savedBeverage.getBeverageName());
         assertEquals("Pale Ale", savedBeverage.getType());
-        assertEquals(5, savedBeverage.getAbv());
+        assertEquals(0, new BigDecimal("5.6").compareTo(savedBeverage.getAbv()));
         assertEquals("A classic American pale ale with citrus and pine hop flavors", savedBeverage.getDescription());
         assertEquals("https://example.com/sierra-nevada.jpg", savedBeverage.getImageUrl());
         assertNotNull(savedBeverage.getCreatedAt());
@@ -67,8 +68,8 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistMultipleBeverages() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4.2"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("4.5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
 
         // Act
         beverageRepository.save(beverage1);
@@ -81,7 +82,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistBeverageWithMinLengthName() {
         // Arrange - beverageName exactly 6 characters (minimum)
-        Beverage beverage = new Beverage(null, "Beer01", "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Beer01", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
@@ -95,7 +96,7 @@ class BeverageRepositoryTest {
     void saveShouldPersistBeverageWithMaxLengthName() {
         // Arrange - beverageName exactly 254 characters (maximum)
         String maxName = "a".repeat(254);
-        Beverage beverage = new Beverage(null, maxName, "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, maxName, "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
@@ -108,7 +109,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistBeverageWithMinLengthType() {
         // Arrange - type exactly 3 characters (minimum)
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
@@ -121,7 +122,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistBeverageWithMinLengthDescription() {
         // Arrange - description exactly 25 characters (minimum)
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer!!!", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer!!!", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
@@ -134,21 +135,21 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldPersistBeverageWithZeroAbv() {
         // Arrange - ABV of 0 for non-alcoholic beverages
-        Beverage beverage = new Beverage(null, "Non-Alcoholic Beer", "Non-Alcoholic", 0, "A great tasting non-alcoholic beverage option", "https://example.com/na-beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Non-Alcoholic Beer", "Non-Alcoholic", new BigDecimal("0"), "A great tasting non-alcoholic beverage option", "https://example.com/na-beer.jpg", LocalDateTime.now());
 
         // Act
         Beverage savedBeverage = beverageRepository.save(beverage);
 
         // Assert
         assertNotNull(savedBeverage);
-        assertEquals(0, savedBeverage.getAbv());
+        assertEquals(0, BigDecimal.ZERO.compareTo(savedBeverage.getAbv()));
     }
 
     // CREATE - Unhappy Paths
     @Test
     void saveShouldThrowExceptionWhenBeverageNameIsNull() {
         // Arrange
-        Beverage beverage = new Beverage(null, null, "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, null, "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -157,7 +158,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenBeverageNameIsBlank() {
         // Arrange
-        Beverage beverage = new Beverage(null, "   ", "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "   ", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -166,7 +167,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenBeverageNameTooShort() {
         // Arrange - beverageName less than 6 characters
-        Beverage beverage = new Beverage(null, "Beer", "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Beer", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -176,7 +177,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenBeverageNameTooLong() {
         // Arrange - beverageName more than 254 characters
         String tooLongName = "a".repeat(255);
-        Beverage beverage = new Beverage(null, tooLongName, "IPA", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, tooLongName, "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -185,7 +186,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenTypeIsNull() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", null, 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", null, new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -194,7 +195,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenTypeIsBlank() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", "   ", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "   ", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -203,7 +204,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenTypeTooShort() {
         // Arrange - type less than 3 characters
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IP", 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IP", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -213,7 +214,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenTypeTooLong() {
         // Arrange - type more than 254 characters
         String tooLongType = "a".repeat(255);
-        Beverage beverage = new Beverage(null, "Test Beer Name", tooLongType, 6, "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", tooLongType, new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -222,7 +223,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenDescriptionIsNull() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, null, "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), null, "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -231,7 +232,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenDescriptionIsBlank() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "   ", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "   ", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -240,7 +241,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenDescriptionTooShort() {
         // Arrange - description less than 25 characters
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "Short description", "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "Short description", "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -250,7 +251,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenDescriptionTooLong() {
         // Arrange - description more than 254 characters
         String tooLongDescription = "a".repeat(255);
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, tooLongDescription, "https://example.com/beer.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), tooLongDescription, "https://example.com/beer.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -259,7 +260,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenImgUrlIsNull() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer with amazing flavors", null, LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", null, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(Exception.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -268,7 +269,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenImgUrlIsBlank() {
         // Arrange
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer with amazing flavors", "   ", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "   ", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -277,7 +278,7 @@ class BeverageRepositoryTest {
     @Test
     void saveShouldThrowExceptionWhenImgUrlTooShort() {
         // Arrange - img_url less than 6 characters
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer with amazing flavors", "a.jpg", LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", "a.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -287,7 +288,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenImgUrlTooLong() {
         // Arrange - img_url more than 500 characters
         String tooLongUrl = "https://example.com/" + "a".repeat(500);
-        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", 6, "A wonderful craft beer with amazing flavors", tooLongUrl, LocalDateTime.now());
+        Beverage beverage = new Beverage(null, "Test Beer Name", "IPA", new BigDecimal("6"), "A wonderful craft beer with amazing flavors", tooLongUrl, LocalDateTime.now());
 
         // Act & Assert
         assertThrows(ConstraintViolationException.class, () -> beverageRepository.saveAndFlush(beverage));
@@ -297,7 +298,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenBeverageNameIsDuplicate() {
         // Arrange
         beverageRepository.save(validBeverage);
-        Beverage duplicateBeverage = new Beverage(null, "Sierra Nevada Pale Ale", "Different Type", 7, "Different description here now", "https://example.com/different.jpg", LocalDateTime.now());
+        Beverage duplicateBeverage = new Beverage(null, "Sierra Nevada Pale Ale", "Different Type", new BigDecimal("7"), "Different description here now", "https://example.com/different.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(duplicateBeverage));
@@ -307,7 +308,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenTypeIsDuplicate() {
         // Arrange
         beverageRepository.save(validBeverage);
-        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Pale Ale", 7, "Different description here now", "https://example.com/different.jpg", LocalDateTime.now());
+        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Pale Ale", new BigDecimal("7"), "Different description here now", "https://example.com/different.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(duplicateBeverage));
@@ -317,7 +318,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenDescriptionIsDuplicate() {
         // Arrange
         beverageRepository.save(validBeverage);
-        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Different Type", 7, "A classic American pale ale with citrus and pine hop flavors", "https://example.com/different.jpg", LocalDateTime.now());
+        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Different Type", new BigDecimal("7"), "A classic American pale ale with citrus and pine hop flavors", "https://example.com/different.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(duplicateBeverage));
@@ -327,7 +328,7 @@ class BeverageRepositoryTest {
     void saveShouldThrowExceptionWhenImgUrlIsDuplicate() {
         // Arrange
         beverageRepository.save(validBeverage);
-        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Different Type", 7, "Different description here now", "https://example.com/sierra-nevada.jpg", LocalDateTime.now());
+        Beverage duplicateBeverage = new Beverage(null, "Different Beer Name", "Different Type", new BigDecimal("7"), "Different description here now", "https://example.com/sierra-nevada.jpg", LocalDateTime.now());
 
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> beverageRepository.saveAndFlush(duplicateBeverage));
@@ -354,8 +355,8 @@ class BeverageRepositoryTest {
     @Test
     void findAllShouldReturnAllBeverages() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         beverageRepository.save(beverage2);
 
@@ -382,8 +383,8 @@ class BeverageRepositoryTest {
     @Test
     void countShouldReturnCorrectNumberOfBeverages() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         beverageRepository.save(beverage2);
 
@@ -485,12 +486,12 @@ class BeverageRepositoryTest {
         UUID beverageId = savedBeverage.getId();
 
         // Act
-        savedBeverage.setAbv(8);
+        savedBeverage.setAbv(new BigDecimal("8.5"));
         beverageRepository.save(savedBeverage);
         Beverage updatedBeverage = beverageRepository.findById(beverageId).orElseThrow();
 
         // Assert
-        assertEquals(8, updatedBeverage.getAbv());
+        assertEquals(0, new BigDecimal("8.5").compareTo(updatedBeverage.getAbv()));
     }
 
     @Test
@@ -532,7 +533,7 @@ class BeverageRepositoryTest {
         // Act
         savedBeverage.setBeverageName("Multi Update Beer");
         savedBeverage.setType("Multi Type");
-        savedBeverage.setAbv(10);
+        savedBeverage.setAbv(new BigDecimal("10.2"));
         savedBeverage.setDescription("This beverage has been updated in multiple ways");
         savedBeverage.setImageUrl("https://example.com/multi-update.jpg");
         beverageRepository.save(savedBeverage);
@@ -541,7 +542,7 @@ class BeverageRepositoryTest {
         // Assert
         assertEquals("Multi Update Beer", updatedBeverage.getBeverageName());
         assertEquals("Multi Type", updatedBeverage.getType());
-        assertEquals(10, updatedBeverage.getAbv());
+        assertEquals(0, new BigDecimal("10.2").compareTo(updatedBeverage.getAbv()));
         assertEquals("This beverage has been updated in multiple ways", updatedBeverage.getDescription());
         assertEquals("https://example.com/multi-update.jpg", updatedBeverage.getImageUrl());
     }
@@ -580,8 +581,8 @@ class BeverageRepositoryTest {
     @Test
     void updateBeverageNameToDuplicateShouldThrowException() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
@@ -623,8 +624,8 @@ class BeverageRepositoryTest {
     @Test
     void updateTypeToDuplicateShouldThrowException() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
@@ -666,8 +667,8 @@ class BeverageRepositoryTest {
     @Test
     void updateDescriptionToDuplicateShouldThrowException() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
@@ -709,8 +710,8 @@ class BeverageRepositoryTest {
     @Test
     void updateImgUrlToDuplicateShouldThrowException() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         Beverage savedBeverage2 = beverageRepository.save(beverage2);
 
@@ -752,8 +753,8 @@ class BeverageRepositoryTest {
     @Test
     void deleteAllShouldRemoveAllBeverages() {
         // Arrange
-        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         beverageRepository.save(beverage1);
         beverageRepository.save(beverage2);
 
@@ -767,9 +768,9 @@ class BeverageRepositoryTest {
     @Test
     void deleteAllByIdShouldRemoveSelectedBeverages() {
         // Arrange
-        Beverage beverage1 = beverageRepository.save(new Beverage(null, "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now()));
-        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now()));
-        Beverage beverage3 = beverageRepository.save(new Beverage(null, "Heineken Premium", "Premium Lager", 5, "Crisp and refreshing premium lager from Holland", "https://example.com/heineken.jpg", LocalDateTime.now()));
+        Beverage beverage1 = beverageRepository.save(new Beverage(null, "Guinness Stout", "Stout", new BigDecimal("4"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now()));
+        Beverage beverage2 = beverageRepository.save(new Beverage(null, "Corona Extra Lager", "Lager", new BigDecimal("5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now()));
+        Beverage beverage3 = beverageRepository.save(new Beverage(null, "Heineken Premium", "Premium Lager", new BigDecimal("5"), "Crisp and refreshing premium lager from Holland", "https://example.com/heineken.jpg", LocalDateTime.now()));
 
         // Act
         beverageRepository.deleteAllById(List.of(beverage1.getId(), beverage2.getId()));

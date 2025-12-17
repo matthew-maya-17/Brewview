@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +45,7 @@ class BeverageServiceTest {
         validRequestDTO = new BeverageRequestDTO(
                 "Sierra Nevada Pale Ale",
                 "Pale Ale",
-                5,
+                new BigDecimal("5.6"),
                 "A classic American pale ale with citrus and pine hop flavors",
                 "https://example.com/sierra-nevada.jpg"
         );
@@ -53,7 +54,7 @@ class BeverageServiceTest {
                 testId,
                 "Sierra Nevada Pale Ale",
                 "Pale Ale",
-                5,
+                new BigDecimal("5.6"),
                 "A classic American pale ale with citrus and pine hop flavors",
                 "https://example.com/sierra-nevada.jpg",
                 LocalDateTime.now()
@@ -82,12 +83,12 @@ class BeverageServiceTest {
     @Test
     void createBeveragesShouldSaveMultipleBeverages() {
         // Arrange
-        BeverageRequestDTO requestDTO1 = new BeverageRequestDTO("Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg");
-        BeverageRequestDTO requestDTO2 = new BeverageRequestDTO("Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg");
+        BeverageRequestDTO requestDTO1 = new BeverageRequestDTO("Guinness Stout", "Stout", new BigDecimal("4.2"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg");
+        BeverageRequestDTO requestDTO2 = new BeverageRequestDTO("Corona Extra Lager", "Lager", new BigDecimal("4.5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg");
         List<BeverageRequestDTO> RequestDTOs = Arrays.asList(requestDTO1, requestDTO2);
 
-        Beverage beverage1 = new Beverage(UUID.randomUUID(), "Guinness Stout", "Stout", 4, "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
-        Beverage beverage2 = new Beverage(UUID.randomUUID(), "Corona Extra Lager", "Lager", 5, "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
+        Beverage beverage1 = new Beverage(UUID.randomUUID(), "Guinness Stout", "Stout", new BigDecimal("4.2"), "Rich and creamy Irish stout with roasted flavors", "https://example.com/guinness.jpg", LocalDateTime.now());
+        Beverage beverage2 = new Beverage(UUID.randomUUID(), "Corona Extra Lager", "Lager", new BigDecimal("4.5"), "Light and refreshing Mexican lager with citrus notes", "https://example.com/corona.jpg", LocalDateTime.now());
         List<Beverage> beverages = Arrays.asList(beverage1, beverage2);
 
         when(beverageRepository.saveAll(anyList())).thenReturn(beverages);
@@ -230,12 +231,12 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<ResponseBeverage> result = beverageService.getBeveragesByAbvRange(4, 6);
+        List<ResponseBeverage> result = beverageService.getBeveragesByAbvRange(new BigDecimal("4.0"), new BigDecimal("6.0"));
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(5, result.get(0).getAbv());
+        assertEquals(0, new BigDecimal("5.6").compareTo(result.get(0).getAbv()));
         verify(beverageRepository, times(1)).findAll();
     }
 
@@ -245,7 +246,7 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<ResponseBeverage> result = beverageService.getBeveragesByAbvRange(10, 15);
+        List<ResponseBeverage> result = beverageService.getBeveragesByAbvRange(new BigDecimal("10.0"), new BigDecimal("15.0"));
 
         // Assert
         assertNotNull(result);
@@ -259,13 +260,13 @@ class BeverageServiceTest {
         when(beverageRepository.findAll()).thenReturn(List.of(savedBeverage));
 
         // Act
-        List<ResponseBeverage> result = beverageService.getBeveragesByTypeAndAbvRange("Pale Ale", 4, 6);
+        List<ResponseBeverage> result = beverageService.getBeveragesByTypeAndAbvRange("Pale Ale", new BigDecimal("4.0"), new BigDecimal("6.0"));
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Pale Ale", result.get(0).getType());
-        assertEquals(5, result.get(0).getAbv());
+        assertEquals(0, new BigDecimal("5.6").compareTo(result.get(0).getAbv()));
         verify(beverageRepository, times(1)).findAll();
     }
 
@@ -374,14 +375,14 @@ class BeverageServiceTest {
     @Test
     void getBeveragesByAbvRangeShouldThrowExceptionWhenMinAbvIsNegative() {
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> beverageService.getBeveragesByAbvRange(-1, 10));
+        assertThrows(BadRequestException.class, () -> beverageService.getBeveragesByAbvRange(new BigDecimal("-1"), new BigDecimal("10")));
         verify(beverageRepository, never()).findAll();
     }
 
     @Test
     void getBeveragesByAbvRangeShouldThrowExceptionWhenMaxAbvLessThanMinAbv() {
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> beverageService.getBeveragesByAbvRange(10, 5));
+        assertThrows(BadRequestException.class, () -> beverageService.getBeveragesByAbvRange(new BigDecimal("10"), new BigDecimal("5")));
         verify(beverageRepository, never()).findAll();
     }
 
@@ -412,7 +413,7 @@ class BeverageServiceTest {
     @Test
     void updateBeverageShouldUpdateAllFieldsSuccessfully() {
         // Arrange
-        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer Name", "Updated Type", 8, "This is an updated description for the beverage", "https://example.com/updated.jpg");
+        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer Name", "Updated Type", new BigDecimal("8.5"), "This is an updated description for the beverage", "https://example.com/updated.jpg");
         when(beverageRepository.findById(testId)).thenReturn(Optional.of(savedBeverage));
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
@@ -462,7 +463,7 @@ class BeverageServiceTest {
         when(beverageRepository.save(any(Beverage.class))).thenReturn(savedBeverage);
 
         // Act
-        ResponseBeverage result = beverageService.updateBeverageAbv(testId, 10);
+        ResponseBeverage result = beverageService.updateBeverageAbv(testId, new BigDecimal("10.5"));
 
         // Assert
         assertNotNull(result);
@@ -504,7 +505,7 @@ class BeverageServiceTest {
     @Test
     void updateBeverageShouldThrowExceptionWhenIdIsNull() {
         // Arrange
-        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer", "IPA", 6, "Updated description for the beer", "https://example.com/updated.jpg");
+        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer", "IPA", new BigDecimal("6.0"), "Updated description for the beer", "https://example.com/updated.jpg");
 
         // Act & Assert
         assertThrows(BadRequestException.class, () -> beverageService.updateBeverage(null, requestDTO));
@@ -521,7 +522,7 @@ class BeverageServiceTest {
     @Test
     void updateBeverageShouldThrowExceptionWhenBeverageNotFound() {
         // Arrange
-        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer", "IPA", 6, "Updated description for the beer", "https://example.com/updated.jpg");
+        BeverageRequestDTO requestDTO = new BeverageRequestDTO("Updated Beer", "IPA", new BigDecimal("6.0"), "Updated description for the beer", "https://example.com/updated.jpg");
         UUID nonExistentId = UUID.randomUUID();
         when(beverageRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -581,7 +582,7 @@ class BeverageServiceTest {
     @Test
     void updateBeverageAbvShouldThrowExceptionWhenAbvIsNegative() {
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> beverageService.updateBeverageAbv(testId, -1));
+        assertThrows(BadRequestException.class, () -> beverageService.updateBeverageAbv(testId, new BigDecimal("-1")));
         verify(beverageRepository, never()).findById(any(UUID.class));
     }
 

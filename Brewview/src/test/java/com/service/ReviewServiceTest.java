@@ -67,7 +67,7 @@ class ReviewServiceTest {
         user = new User("testuser", "test@example.com", "hash", Role.ROLE_USER, LocalDateTime.now());
         user.setId(userId);
 
-        beverage = new Beverage(userId, "Test Beer", "IPA", 6, "A test beer description here for testing", "https://example.com/beer.jpg", LocalDateTime.now());
+        beverage = new Beverage(userId, "Test Beer", "IPA", new BigDecimal("6.0"), "A test beer description here for testing", "https://example.com/beer.jpg", LocalDateTime.now());
         beverage.setId(beverageId);
 
         location = new Location("Test Location", "123 Test St", "Test City", "United States");

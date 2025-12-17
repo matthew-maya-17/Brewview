@@ -8,6 +8,7 @@ import com.repository.BeverageRepository;
 import com.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -89,36 +90,36 @@ public class BeverageService {
         return toDTOList(beverages);
     }
 
-    public List<ResponseBeverage> getBeveragesByAbvRange(int minAbv, int maxAbv) {
-        if (minAbv < 0) {
+    public List<ResponseBeverage> getBeveragesByAbvRange(BigDecimal minAbv, BigDecimal maxAbv) {
+        if (minAbv == null || minAbv.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BadRequestException("Minimum ABV cannot be negative");
         }
-        if (maxAbv < minAbv) {
+        if (maxAbv == null || maxAbv.compareTo(minAbv) < 0) {
                 throw new BadRequestException("Maximum ABV cannot be less than minimum ABV");
         }
 
         List<Beverage> beverages = beverageRepository.findAll().stream()
-                .filter(b -> b.getAbv() >= minAbv && b.getAbv() <= maxAbv)
+                .filter(b -> b.getAbv().compareTo(minAbv) >= 0 && b.getAbv().compareTo(maxAbv) <= 0)
                 .toList();
 
         return toDTOList(beverages);
     }
 
-    public List<ResponseBeverage> getBeveragesByTypeAndAbvRange(String type, int minAbv, int maxAbv) {
+    public List<ResponseBeverage> getBeveragesByTypeAndAbvRange(String type, BigDecimal minAbv, BigDecimal maxAbv) {
         if (type == null || type.trim().isEmpty()) {
                 throw new BadRequestException("Beverage type cannot be null or empty");
         }
-        if (minAbv < 0) {
+        if (minAbv == null || minAbv.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BadRequestException("Minimum ABV cannot be negative");
         }
-        if (maxAbv < minAbv) {
+        if (maxAbv == null || maxAbv.compareTo(minAbv) < 0) {
                 throw new BadRequestException("Maximum ABV cannot be less than minimum ABV");
         }
 
 
         List<Beverage> beverages = beverageRepository.findAll().stream()
                 .filter(b -> b.getType().equals(type))
-                .filter(b -> b.getAbv() >= minAbv && b.getAbv() <= maxAbv)
+                .filter(b -> b.getAbv().compareTo(minAbv) >= 0 && b.getAbv().compareTo(maxAbv) <= 0)
                 .toList();
 
         return toDTOList(beverages);
@@ -198,11 +199,11 @@ public class BeverageService {
         return toDTO(savedBeverage);
     }
 
-    public ResponseBeverage updateBeverageAbv(UUID id, int newAbv) {
+    public ResponseBeverage updateBeverageAbv(UUID id, BigDecimal newAbv) {
         if (id == null) {
             throw new BadRequestException("Beverage ID cannot be null or empty");
         }
-        if (newAbv < 0) {
+        if (newAbv == null || newAbv.compareTo(BigDecimal.ZERO) < 0) {
             throw new BadRequestException("ABV cannot be negative");
         }
 
