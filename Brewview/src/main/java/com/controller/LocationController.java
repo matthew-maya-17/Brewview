@@ -41,7 +41,7 @@ public class LocationController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ResponseLocation> createLocation(@Valid @RequestBody LocationCreateDTO locationRequest) {
         ResponseLocation returnedLocation = locationService.createLocation(locationRequest);
@@ -188,7 +188,7 @@ public class LocationController {
     public ResponseEntity<List<ResponseLocation>> getLocationsByCity(
             @Parameter(
                     name = "city",
-                    description = "City to filter locations by",
+                    description = "City to filter locations by.",
                     required = true,
                     example = "New York"
             )
@@ -266,7 +266,7 @@ public class LocationController {
             }
     )
     @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
-    @GetMapping("/search")
+    @GetMapping("/search/city/country")
     public ResponseEntity<List<ResponseLocation>> getLocationsByCityAndCountry(
             @Parameter(
                     name = "city",
