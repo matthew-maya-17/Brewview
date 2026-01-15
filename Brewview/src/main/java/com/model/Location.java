@@ -13,7 +13,7 @@ public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "location_id")
     private UUID id;
 
     @Column(name = "location_name", nullable = false)
