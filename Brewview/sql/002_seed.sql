@@ -2,9 +2,9 @@ BEGIN;
 
 -- Users
 INSERT INTO users (username, email, password_hash, role_name) VALUES
-('admin_user', 'admin@example.com', '$2y$10$3ChKZYFPnEXinPo8nfcn6O0PyU2h.tMsFAEuu9W2RpsF/cNUxI/5.', 'ROLE_ADMIN'),
-('alex_rodgers', 'alex@example.com', '$2y$10$1yOuXGBsNf9OzFkcwR.mBuaTLRnqIFBss0Z7KAuxp2EzFui.rrm3.', 'ROLE_USER'),
-('jane_smith', 'jane@example.com', '$2y$10$Yss7uzma2yAqEHrMCdvw3u.lwM0DwutO0CGLhkqSaAKVShyXka/uK', 'ROLE_USER');
+('admin_user', 'admin@example.com', '$2y$10$jZU8K7UfcMv0WqQLKyp.wOjRRz1ghogfMHcfzMGI53ZUx0LJxYYqa', 'ROLE_ADMIN'),  -- Unhashed Password: P@ssword123
+('alex_rodgers', 'alex@example.com', '$2y$10$jZU8K7UfcMv0WqQLKyp.wOjRRz1ghogfMHcfzMGI53ZUx0LJxYYqa', 'ROLE_USER'),  -- Unhashed Password: P@ssword123
+('jane_smith', 'jane@example.com', '$2y$10$jZU8K7UfcMv0WqQLKyp.wOjRRz1ghogfMHcfzMGI53ZUx0LJxYYqa', 'ROLE_USER');    -- Unhashed Password: P@ssword123
 
 -- Locations
 INSERT INTO locations (location_name, address, city, country) VALUES
