@@ -52,8 +52,6 @@ public class UserController {
             description = "Returns a list of all User entities in the system.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users."),
-                    @ApiResponse(responseCode = "204", description = "Request was successful but no users exist in the system."),
-                    @ApiResponse(responseCode = "400", description = "Bad request. Invalid query parameters were provided."),
                     @ApiResponse(responseCode = "401", description = "Unauthorized. Authentication is required."),
                     @ApiResponse(responseCode = "403", description = "Forbidden. You do not have permission to access this resource."),
                     @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred.")
@@ -273,10 +271,6 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "404",
                             description = "Not Found. No user exists with the provided ID."
-                    ),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Conflict. The update would violate a uniqueness constraint (e.g., email or username already in use)."
                     ),
                     @ApiResponse(
                             responseCode = "500",
