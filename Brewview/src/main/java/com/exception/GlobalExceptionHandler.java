@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiError> handleBadRequestException(ResourceNotFoundException e, HttpServletRequest request){
+    public ResponseEntity<ApiError> handleBadRequestException(BadRequestException e, HttpServletRequest request){
         ApiError errorResponse = new ApiError();
         errorResponse.setTimeStamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -45,5 +45,17 @@ public class GlobalExceptionHandler {
         errorResponse.setPath(request.getRequestURI());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAllException(Exception e, HttpServletRequest request){
+        ApiError errorResponse = new ApiError();
+        errorResponse.setTimeStamp(LocalDateTime.now());
+        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
