@@ -112,54 +112,6 @@ public class LocationController {
         return ResponseEntity.ok(returnedLocation);
     }
 
-    @Operation(
-            summary = "Search locations by name",
-            description = "Returns a list of Location entities where the name contains the provided search term (case-insensitive).",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Successfully retrieved locations matching the search term."
-                    ),
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "Request was successful but no locations exist in the system."
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Bad request. The provided search term is invalid."
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized. Authentication is required to access this resource."
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden. You do not have permission to view locations."
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error. An unexpected error occurred."
-                    )
-            }
-    )
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
-    @GetMapping("/search/name")
-    public ResponseEntity<List<ResponseLocation>> searchLocationsByName(
-            @Parameter(
-                    name = "name",
-                    description = "Search term to find locations (case-insensitive, partial match)",
-                    required = true,
-                    example = "Brew"
-            )
-            @RequestParam String name
-    ) {
-        List<ResponseLocation> returnedLocationList = locationService.searchLocationsByName(name);
-        if (returnedLocationList.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(returnedLocationList);
-    }
-
 
     @Operation(
             summary = "Retrieve a location by name",
@@ -193,17 +145,22 @@ public class LocationController {
     )
     @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @GetMapping("/name/{locationName}")
-    public ResponseEntity<ResponseLocation> getLocationByName(
+    public ResponseEntity<List<ResponseLocation>> getLocationsByName(
             @Parameter(
                     name = "locationName",
-                    description = "Name of the location to retrieve.",
+                    description = "Name to search for in locations (case-insensitive, partial match)",
                     required = true,
-                    example = "Headquarters"
+                    example = "Brew"
             )
             @PathVariable String locationName
     ) {
-        ResponseLocation returnedLocation = locationService.getLocationByName(locationName);
-        return ResponseEntity.ok(returnedLocation);
+        List<ResponseLocation> returnedLocationList = locationService.getLocationsByName(locationName);
+
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(returnedLocationList);
     }
 
     @Operation(
