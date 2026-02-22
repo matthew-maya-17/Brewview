@@ -150,7 +150,7 @@ public class LocationController {
                     name = "locationName",
                     description = "Name to search for in locations",
                     required = true,
-                    example = "Brew"
+                    example = "Barney's Pub"
             )
             @PathVariable String locationName
     ) {

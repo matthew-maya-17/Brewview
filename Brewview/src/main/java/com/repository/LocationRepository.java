@@ -13,7 +13,7 @@ public interface LocationRepository extends JpaRepository<Location, UUID> {
 
     Optional<Location> findByLocationName(String locationName);
 
-    List<Location> findByLocationNameContainingIgnoreCase(String locationName);
+    List<Location> findByLocationNames(String locationName);
 
     List<Location> findByCity(String city);
 

@@ -40,7 +40,7 @@ public class LocationService {
     }
 
     public List<ResponseLocation> getLocationsByName(String locationName) {
-        List<Location> locations = locationRepository.findByLocationNameContainingIgnoreCase(locationName);
+        List<Location> locations = locationRepository.findByLocationNames(locationName);
         return toDTOList(locations);
     }
 

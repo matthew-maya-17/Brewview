@@ -136,7 +136,7 @@ public class LocationServiceTest {
     @Test
     void getLocationsByName_FindsMultipleLocations() {
         List<Location> locations = Arrays.asList(testLocation, testLocation3);
-        when(locationRepository.findByLocationNameContainingIgnoreCase("Headquarters"))
+        when(locationRepository.findByLocationNames("Headquarters"))
                 .thenReturn(locations);
 
         List<ResponseLocation> results = locationService.getLocationsByName("Headquarters");
@@ -144,57 +144,57 @@ public class LocationServiceTest {
         assertEquals(2, results.size());
         assertTrue(results.stream().anyMatch(l -> l.getLocationName().equals("Headquarters")));
         assertTrue(results.stream().anyMatch(l -> l.getLocationName().equals("Regional Headquarters")));
-        verify(locationRepository).findByLocationNameContainingIgnoreCase("Headquarters");
+        verify(locationRepository).findByLocationNames("Headquarters");
     }
 
     @Test
     void getLocationsByName_FindsSingleLocation() {
         List<Location> locations = Collections.singletonList(testLocation2);
-        when(locationRepository.findByLocationNameContainingIgnoreCase("Branch"))
+        when(locationRepository.findByLocationNames("Branch"))
                 .thenReturn(locations);
 
         List<ResponseLocation> results = locationService.getLocationsByName("Branch");
 
         assertEquals(1, results.size());
         assertEquals("Branch Office", results.get(0).getLocationName());
-        verify(locationRepository).findByLocationNameContainingIgnoreCase("Branch");
+        verify(locationRepository).findByLocationNames("Branch");
     }
 
     @Test
     void getLocationsByName_ReturnsEmptyList_WhenNoMatches() {
-        when(locationRepository.findByLocationNameContainingIgnoreCase("Pizza"))
+        when(locationRepository.findByLocationNames("Pizza"))
                 .thenReturn(Collections.emptyList());
 
         List<ResponseLocation> results = locationService.getLocationsByName("Pizza");
 
         assertTrue(results.isEmpty());
-        verify(locationRepository).findByLocationNameContainingIgnoreCase("Pizza");
+        verify(locationRepository).findByLocationNames("Pizza");
     }
 
     @Test
     void getLocationsByName_CaseInsensitive() {
         List<Location> locations = Collections.singletonList(testLocation);
-        when(locationRepository.findByLocationNameContainingIgnoreCase("headquarters"))
+        when(locationRepository.findByLocationNames("headquarters"))
                 .thenReturn(locations);
 
         List<ResponseLocation> results = locationService.getLocationsByName("headquarters");
 
         assertEquals(1, results.size());
         assertEquals("Headquarters", results.get(0).getLocationName());
-        verify(locationRepository).findByLocationNameContainingIgnoreCase("headquarters");
+        verify(locationRepository).findByLocationNames("headquarters");
     }
 
     @Test
     void getLocationsByName_PartialMatch() {
         List<Location> locations = Collections.singletonList(testLocation);
-        when(locationRepository.findByLocationNameContainingIgnoreCase("Head"))
+        when(locationRepository.findByLocationNames("Head"))
                 .thenReturn(locations);
 
         List<ResponseLocation> results = locationService.getLocationsByName("Head");
 
         assertEquals(1, results.size());
         assertEquals("Headquarters", results.get(0).getLocationName());
-        verify(locationRepository).findByLocationNameContainingIgnoreCase("Head");
+        verify(locationRepository).findByLocationNames("Head");
 
     }
 
