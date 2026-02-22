@@ -1,6 +1,7 @@
 package com.exception;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class ApiError {
@@ -10,7 +11,7 @@ public class ApiError {
     private String message;
     private String path;
 
-    private Map<String, String> fieldErrors;
+    private Map<String, List<String>> fieldErrors;
 
     public ApiError(){}
 
@@ -64,11 +65,11 @@ public class ApiError {
         this.path = path;
     }
 
-    public Map<String, String> getFieldErrors() {
+    public Map<String, List<String>> getFieldErrors() {
         return fieldErrors;
     }
 
-    public void setFieldErrors(Map<String, String> fieldErrors) {
+    public void setFieldErrors(Map<String, List<String>> fieldErrors) {
         this.fieldErrors = fieldErrors;
     }
 }
