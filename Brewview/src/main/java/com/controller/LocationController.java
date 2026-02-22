@@ -148,7 +148,7 @@ public class LocationController {
     public ResponseEntity<List<ResponseLocation>> getLocationsByName(
             @Parameter(
                     name = "locationName",
-                    description = "Name to search for in locations (case-insensitive, partial match)",
+                    description = "Name to search for in locations",
                     required = true,
                     example = "Brew"
             )
