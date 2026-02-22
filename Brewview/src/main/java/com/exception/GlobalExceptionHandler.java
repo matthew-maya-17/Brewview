@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
@@ -66,10 +68,12 @@ public class GlobalExceptionHandler {
     // Handles @Valid @RequestBody validation failures
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request){
-        Map<String, String> fieldErrors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        Map<String, List<String>> fieldErrors = new HashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+            fieldErrors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
+        });
 
         ApiError errorResponse = new ApiError();
         errorResponse.setTimeStamp(LocalDateTime.now());
