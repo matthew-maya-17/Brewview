@@ -39,6 +39,11 @@ public class LocationService {
         return toDTO(location);
     }
 
+    public List<ResponseLocation> searchLocationsByName(String locationName) {
+        List<Location> locations = locationRepository.findByLocationNameContainingIgnoreCase(locationName);
+        return toDTOList(locations);
+    }
+
     public ResponseLocation getLocationByName(String locationName) {
         Location location = locationRepository.findByLocationName(locationName)
                 .orElseThrow(() -> new ResourceNotFoundException("Location with name '" + locationName + "' not found"));

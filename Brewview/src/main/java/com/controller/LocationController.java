@@ -55,7 +55,6 @@ public class LocationController {
                     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of locations."),
                     @ApiResponse(responseCode = "204", description = "Request was successful but no locations exist in the system."),
                     @ApiResponse(responseCode = "400", description = "Bad request. Invalid query parameters were provided."),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized. Authentication is required."),
                     @ApiResponse(responseCode = "403", description = "Forbidden. You do not have permission to access this resource."),
                     @ApiResponse(responseCode = "500", description = "Internal server error. An unexpected error occurred.")
             }
@@ -64,6 +63,11 @@ public class LocationController {
     @GetMapping()
     public ResponseEntity<List<ResponseLocation>> getAllLocations() {
         List<ResponseLocation> returnedLocationList = locationService.getAllLocations();
+
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(returnedLocationList);
     }
 
@@ -78,10 +82,6 @@ public class LocationController {
                     @ApiResponse(
                             responseCode = "400",
                             description = "Bad request. The provided UUID is invalid or malformed."
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized. Authentication is required to access this resource."
                     ),
                     @ApiResponse(
                             responseCode = "403",
@@ -111,6 +111,55 @@ public class LocationController {
         ResponseLocation returnedLocation = locationService.getLocationById(id);
         return ResponseEntity.ok(returnedLocation);
     }
+
+    @Operation(
+            summary = "Search locations by name",
+            description = "Returns a list of Location entities where the name contains the provided search term (case-insensitive).",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successfully retrieved locations matching the search term."
+                    ),
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Request was successful but no locations exist in the system."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Bad request. The provided search term is invalid."
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized. Authentication is required to access this resource."
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden. You do not have permission to view locations."
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal server error. An unexpected error occurred."
+                    )
+            }
+    )
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @GetMapping("/search/name")
+    public ResponseEntity<List<ResponseLocation>> searchLocationsByName(
+            @Parameter(
+                    name = "name",
+                    description = "Search term to find locations (case-insensitive, partial match)",
+                    required = true,
+                    example = "Brew"
+            )
+            @RequestParam String name
+    ) {
+        List<ResponseLocation> returnedLocationList = locationService.searchLocationsByName(name);
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(returnedLocationList);
+    }
+
 
     @Operation(
             summary = "Retrieve a location by name",
@@ -166,16 +215,12 @@ public class LocationController {
                             description = "Successfully retrieved locations in the given city."
                     ),
                     @ApiResponse(
+                            responseCode = "204",
+                            description = "Request was successful but no locations exist in the system."
+                    ),
+                    @ApiResponse(
                             responseCode = "400",
                             description = "Bad request. The provided city is invalid or malformed."
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized. Authentication is required to access this resource."
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden. You do not have permission to view locations."
                     ),
                     @ApiResponse(
                             responseCode = "500",
@@ -195,6 +240,11 @@ public class LocationController {
             @PathVariable String city
     ) {
         List<ResponseLocation> returnedLocationList = locationService.getLocationsByCity(city);
+
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(returnedLocationList);
     }
 
@@ -205,6 +255,10 @@ public class LocationController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Successfully retrieved locations in the given country."
+                    ),
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Request was successful but no locations exist in the system."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -236,6 +290,11 @@ public class LocationController {
             @PathVariable String country
     ) {
         List<ResponseLocation> returnedLocationList = locationService.getLocationsByCountry(country);
+
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(returnedLocationList);
     }
 
@@ -246,6 +305,10 @@ public class LocationController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Successfully retrieved locations in the given city and country."
+                    ),
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Request was successful but no locations exist in the system."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -284,6 +347,11 @@ public class LocationController {
             @RequestParam String country
     ) {
         List<ResponseLocation> returnedLocationList = locationService.getLocationsByCityAndCountry(city, country);
+
+        if (returnedLocationList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(returnedLocationList);
     }
 
