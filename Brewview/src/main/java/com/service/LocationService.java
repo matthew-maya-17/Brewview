@@ -39,10 +39,9 @@ public class LocationService {
         return toDTO(location);
     }
 
-    public ResponseLocation getLocationByName(String locationName) {
-        Location location = locationRepository.findByLocationName(locationName)
-                .orElseThrow(() -> new ResourceNotFoundException("Location with name '" + locationName + "' not found"));
-        return toDTO(location);
+    public List<ResponseLocation> getLocationsByName(String locationName) {
+        List<Location> locations = locationRepository.findByLocationName(locationName);
+        return toDTOList(locations);
     }
 
     public List<ResponseLocation> getAllLocations() {

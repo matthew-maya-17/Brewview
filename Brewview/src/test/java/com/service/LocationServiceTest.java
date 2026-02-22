@@ -14,10 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,15 +31,18 @@ public class LocationServiceTest {
 
     private Location testLocation;
     private Location testLocation2;
+    private Location testLocation3;
     private LocationCreateDTO createDTO;
     private LocationUpdateDTO updateDTO;
     private UUID testLocationId;
     private UUID testLocation2Id;
+    private UUID testLocation3Id;
 
     @BeforeEach
     void setUp() {
         testLocationId = UUID.randomUUID();
         testLocation2Id = UUID.randomUUID();
+        testLocation3Id = UUID.randomUUID();
 
         testLocation = new Location(
                 "Headquarters",
@@ -55,6 +55,13 @@ public class LocationServiceTest {
                 "Branch Office",
                 "456 Oak Avenue",
                 "Los Angeles",
+                "USA"
+        );
+
+        testLocation3 = new Location(
+                "Regional Headquarters",
+                "789 Pine Street",
+                "Chicago",
                 "USA"
         );
 
@@ -127,27 +134,68 @@ public class LocationServiceTest {
     }
 
     @Test
-    void getLocationByName_Success() {
-        when(locationRepository.findByLocationName("Headquarters")).thenReturn(Optional.of(testLocation));
+    void getLocationsByName_FindsMultipleLocations() {
+        List<Location> locations = Arrays.asList(testLocation, testLocation3);
+        when(locationRepository.findByLocationName("Headquarters"))
+                .thenReturn(locations);
 
-        ResponseLocation result = locationService.getLocationByName("Headquarters");
+        List<ResponseLocation> results = locationService.getLocationsByName("Headquarters");
 
-        assertNotNull(result);
-        assertEquals("Headquarters", result.getLocationName());
+        assertEquals(2, results.size());
+        assertTrue(results.stream().anyMatch(l -> l.getLocationName().equals("Headquarters")));
+        assertTrue(results.stream().anyMatch(l -> l.getLocationName().equals("Regional Headquarters")));
         verify(locationRepository).findByLocationName("Headquarters");
     }
 
     @Test
-    void getLocationByName_ThrowsException_WhenNotFound() {
-        when(locationRepository.findByLocationName("NonExistent")).thenReturn(Optional.empty());
+    void getLocationsByName_FindsSingleLocation() {
+        List<Location> locations = Collections.singletonList(testLocation2);
+        when(locationRepository.findByLocationName("Branch"))
+                .thenReturn(locations);
 
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> locationService.getLocationByName("NonExistent")
-        );
+        List<ResponseLocation> results = locationService.getLocationsByName("Branch");
 
-        assertTrue(exception.getMessage().contains("not found"));
-        verify(locationRepository).findByLocationName("NonExistent");
+        assertEquals(1, results.size());
+        assertEquals("Branch Office", results.get(0).getLocationName());
+        verify(locationRepository).findByLocationName("Branch");
+    }
+
+    @Test
+    void getLocationsByName_ReturnsEmptyList_WhenNoMatches() {
+        when(locationRepository.findByLocationName("Pizza"))
+                .thenReturn(Collections.emptyList());
+
+        List<ResponseLocation> results = locationService.getLocationsByName("Pizza");
+
+        assertTrue(results.isEmpty());
+        verify(locationRepository).findByLocationName("Pizza");
+    }
+
+    @Test
+    void getLocationsByName_CaseInsensitive() {
+        List<Location> locations = Collections.singletonList(testLocation);
+        when(locationRepository.findByLocationName("headquarters"))
+                .thenReturn(locations);
+
+        List<ResponseLocation> results = locationService.getLocationsByName("headquarters");
+
+        assertEquals(1, results.size());
+        assertEquals("Headquarters", results.get(0).getLocationName());
+        verify(locationRepository).findByLocationName("headquarters");
+    }
+
+    @Test
+    void getLocationsByName_PartialMatch() {
+        List<Location> locations = Collections.singletonList(testLocation);
+        when(locationRepository.findByLocationName("Head"))
+                .thenReturn(locations);
+
+        List<ResponseLocation> results = locationService.getLocationsByName("Head");
+
+        assertEquals(1, results.size());
+        assertEquals("Headquarters", results.get(0).getLocationName());
+        verify(locationRepository).findByLocationName("Head");
+
     }
 
     @Test
