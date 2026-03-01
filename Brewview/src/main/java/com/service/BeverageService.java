@@ -2,11 +2,13 @@ package com.service;
 
 import com.dto.BeverageRequestDTO;
 import com.dto.ResponseBeverage;
+import com.exception.ResourceConflictException;
 import com.exception.ResourceNotFoundException;
 import com.model.Beverage;
 import com.repository.BeverageRepository;
 import com.exception.BadRequestException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class BeverageService {
 
     private final BeverageRepository beverageRepository;
@@ -29,6 +32,17 @@ public class BeverageService {
                 throw new BadRequestException("Beverage cannot be null");
         }
 
+        if (beverageRepository.existsByBeverageNameAndTypeAndAbv(
+                requestDTO.getBeverageName(),
+                requestDTO.getType(),
+                requestDTO.getAbv())) {
+            throw new ResourceConflictException(
+                    "Beverage with name '" + requestDTO.getBeverageName() +
+                            "', type '" + requestDTO.getType() +
+                            "', and ABV " + requestDTO.getAbv() + " already exists"
+            );
+        }
+
         Beverage beverage = toEntity(requestDTO);
         beverage.setCreatedAt(LocalDateTime.now());
 
@@ -39,6 +53,28 @@ public class BeverageService {
     public List<ResponseBeverage> createBeverages(List<BeverageRequestDTO> requestDTOS) {
         if (requestDTOS == null || requestDTOS.isEmpty()) {
                 throw new BadRequestException("Beverage list cannot be null or empty");
+        }
+
+        long distinctCount = requestDTOS.stream()
+                .map(dto -> dto.getBeverageName() + "|" + dto.getType() + "|" + dto.getAbv())
+                .distinct()
+                .count();
+
+        if (distinctCount != requestDTOS.size()) {
+            throw new ResourceConflictException("Duplicate beverages (same name, type, and ABV) found in request");
+        }
+
+        for (BeverageRequestDTO dto : requestDTOS) {
+            if (beverageRepository.existsByBeverageNameAndTypeAndAbv(
+                    dto.getBeverageName(),
+                    dto.getType(),
+                    dto.getAbv())) {
+                throw new ResourceConflictException(
+                        "Beverage with name '" + dto.getBeverageName() +
+                                "', type '" + dto.getType() +
+                                "', and ABV " + dto.getAbv() + " already exists"
+                );
+            }
         }
 
         List<Beverage> beverages = toEntityList(requestDTOS);
@@ -65,17 +101,20 @@ public class BeverageService {
         return toDTO(beverage);
     }
 
-    public Optional<ResponseBeverage> getBeverageByName(String beverageName) {
+    public ResponseBeverage getBeverageByName(String beverageName) {
 
         if (beverageName == null || beverageName.trim().isEmpty()) {
-                throw new BadRequestException("Beverage name cannot be null or empty");
+            throw new BadRequestException("Beverage name cannot be null or empty");
         }
 
-        List<Beverage> beverages = beverageRepository.findAll();
-        return beverages.stream()
-                .filter(b -> b.getBeverageName().equals(beverageName))
-                .findFirst()
-                .map(this::toDTO);
+        if (beverageName.trim().length() < 6) {
+            throw new BadRequestException("Beverage name must be at least 6 characters long");
+        }
+
+        Beverage beverage = beverageRepository.findByBeverageName(beverageName)
+                .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with name: " + beverageName));
+
+        return toDTO(beverage);
     }
 
     public List<ResponseBeverage> getBeveragesByType(String type) {
@@ -84,7 +123,7 @@ public class BeverageService {
         }
 
         List<Beverage> beverages = beverageRepository.findAll().stream()
-                .filter(b -> b.getType().equals(type))
+                .filter(b -> b.getType().equalsIgnoreCase(type))
                 .toList();
 
         return toDTOList(beverages);
@@ -98,9 +137,7 @@ public class BeverageService {
                 throw new BadRequestException("Maximum ABV cannot be less than minimum ABV");
         }
 
-        List<Beverage> beverages = beverageRepository.findAll().stream()
-                .filter(b -> b.getAbv().compareTo(minAbv) >= 0 && b.getAbv().compareTo(maxAbv) <= 0)
-                .toList();
+        List<Beverage> beverages = beverageRepository.findByAbvBetween(minAbv, maxAbv);
 
         return toDTOList(beverages);
     }
@@ -118,7 +155,7 @@ public class BeverageService {
 
 
         List<Beverage> beverages = beverageRepository.findAll().stream()
-                .filter(b -> b.getType().equals(type))
+                .filter(b -> b.getType().equalsIgnoreCase(type))
                 .filter(b -> b.getAbv().compareTo(minAbv) >= 0 && b.getAbv().compareTo(maxAbv) <= 0)
                 .toList();
 
@@ -133,12 +170,12 @@ public class BeverageService {
     }
 
     public boolean beverageNameExists(String beverageName) {
+
         if (beverageName == null || beverageName.trim().isEmpty()) {
-                throw new BadRequestException("Beverage name cannot be null or empty");
+            return false;
         }
 
-        return beverageRepository.findAll().stream()
-                .anyMatch(b -> b.getBeverageName().equals(beverageName));
+        return beverageRepository.existsByBeverageName(beverageName);
     }
 
     public long getTotalBeverageCount() {
@@ -157,6 +194,26 @@ public class BeverageService {
         Beverage existingBeverage = beverageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
 
+        boolean isNameChanged = !existingBeverage.getBeverageName().equals(requestDTO.getBeverageName());
+        boolean isTypeChanged = !existingBeverage.getType().equals(requestDTO.getType());
+        boolean isAbvChanged = existingBeverage.getAbv().compareTo(requestDTO.getAbv()) != 0;
+
+        if (isNameChanged || isTypeChanged || isAbvChanged) {
+            Optional<Beverage> duplicate = beverageRepository.findByBeverageNameAndTypeAndAbv(
+                    requestDTO.getBeverageName(),
+                    requestDTO.getType(),
+                    requestDTO.getAbv()
+            );
+
+            if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
+                throw new ResourceConflictException(
+                        "Beverage with name '" + requestDTO.getBeverageName() +
+                                "', type '" + requestDTO.getType() +
+                                "', and ABV " + requestDTO.getAbv() + " already exists"
+                );
+            }
+        }
+
         existingBeverage.setBeverageName(requestDTO.getBeverageName());
         existingBeverage.setType(requestDTO.getType());
         existingBeverage.setAbv(requestDTO.getAbv());
@@ -174,9 +231,28 @@ public class BeverageService {
         if (newName == null || newName.trim().isEmpty()) {
                 throw new BadRequestException("Beverage name cannot be null or empty");
         }
+        if (newName.trim().length() < 6) {
+            throw new BadRequestException("Beverage name must be at least 6 characters long");
+        }
 
         Beverage beverage = beverageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
+
+        if (!beverage.getBeverageName().equals(newName)) {
+            Optional<Beverage> duplicate = beverageRepository.findByBeverageNameAndTypeAndAbv(
+                    newName,
+                    beverage.getType(),
+                    beverage.getAbv()
+            );
+
+            if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
+                throw new ResourceConflictException(
+                        "Beverage with name '" + newName +
+                                "', type '" + beverage.getType() +
+                                "', and ABV " + beverage.getAbv() + " already exists"
+                );
+            }
+        }
 
         beverage.setBeverageName(newName);
         Beverage savedBeverage = beverageRepository.save(beverage);
@@ -194,6 +270,22 @@ public class BeverageService {
         Beverage beverage = beverageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
 
+        if (!beverage.getType().equals(newType)) {
+            Optional<Beverage> duplicate = beverageRepository.findByBeverageNameAndTypeAndAbv(
+                    beverage.getBeverageName(),
+                    newType,
+                    beverage.getAbv()
+            );
+
+            if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
+                throw new ResourceConflictException(
+                        "Beverage with name '" + beverage.getBeverageName() +
+                                "', type '" + newType +
+                                "', and ABV " + beverage.getAbv() + " already exists"
+                );
+            }
+        }
+
         beverage.setType(newType);
         Beverage savedBeverage = beverageRepository.save(beverage);
         return toDTO(savedBeverage);
@@ -210,6 +302,22 @@ public class BeverageService {
         Beverage beverage = beverageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Beverage not found with id: " + id));
 
+        if (beverage.getAbv().compareTo(newAbv) != 0) {
+            Optional<Beverage> duplicate = beverageRepository.findByBeverageNameAndTypeAndAbv(
+                    beverage.getBeverageName(),
+                    beverage.getType(),
+                    newAbv
+            );
+
+            if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
+                throw new ResourceConflictException(
+                        "Beverage with name '" + beverage.getBeverageName() +
+                                "', type '" + beverage.getType() +
+                                "', and ABV " + newAbv + " already exists"
+                );
+            }
+        }
+
         beverage.setAbv(newAbv);
         Beverage savedBeverage = beverageRepository.save(beverage);
         return toDTO(savedBeverage);
@@ -221,6 +329,9 @@ public class BeverageService {
         }
         if (newDescription == null || newDescription.trim().isEmpty()) {
             throw new BadRequestException("Beverage description cannot be null or empty");
+        }
+        if (newDescription.trim().length() < 25) {
+            throw new BadRequestException("Beverage description must be at least 25 characters long");
         }
 
         Beverage beverage = beverageRepository.findById(id)

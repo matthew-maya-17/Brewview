@@ -24,7 +24,7 @@ public class Beverage {
     @Size(message = "The Beverage name must be between 6 and 254 characters!", min = 6, max = 254)
     private String beverageName;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     @NotBlank
     @Size(message = "The Beverage Type must be between 3 and 254 characters!", min = 3, max = 254)
     private String type;
@@ -34,7 +34,7 @@ public class Beverage {
     @Min(value = 0, message = "ABV must be 0 or greater")
     private BigDecimal abv;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     @NotBlank
     @Size(message = "The Beverage Description must be between 25 and 254 characters", min = 25, max = 254)
     private String description;

@@ -76,6 +76,10 @@ public class BeverageController {
     @GetMapping()
     public ResponseEntity<List<ResponseBeverage>> getAllBeverages() {
         List<ResponseBeverage> beverages = beverageService.getAllBeverages();
+        if (beverages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(beverages);
     }
 
@@ -147,9 +151,8 @@ public class BeverageController {
             )
             @RequestParam String name
     ) {
-        Optional<ResponseBeverage> beverage = beverageService.getBeverageByName(name);
-        return beverage.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ResponseBeverage beverage = beverageService.getBeverageByName(name);
+        return ResponseEntity.ok(beverage);
     }
 
     @Operation(
@@ -159,6 +162,10 @@ public class BeverageController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Successfully retrieved beverages with the given type."
+                    ),
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "No beverages found with the given type."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -181,6 +188,9 @@ public class BeverageController {
             @PathVariable String type
     ) {
         List<ResponseBeverage> beverages = beverageService.getBeveragesByType(type);
+        if (beverages.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(beverages);
     }
 
