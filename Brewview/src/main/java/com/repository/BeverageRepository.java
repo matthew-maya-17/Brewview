@@ -23,4 +23,8 @@ public interface BeverageRepository extends JpaRepository<Beverage, UUID>{
     boolean existsByBeverageName(String beverageName);
 
     boolean existsByType(String type);
+
+    boolean existsByBeverageNameAndTypeAndAbv(String beverageName, String type, BigDecimal abv);
+
+    Optional<Beverage> findByBeverageNameAndTypeAndAbv(String beverageName, String type, BigDecimal abv);
 }
